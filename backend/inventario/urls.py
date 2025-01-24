@@ -20,7 +20,7 @@ from dispositivos import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.lista_dispositivos, name='lista_dispositivos'),
-    path('agregar/', views.agregar_dispositivo, name='agregar_dispositivo'),
-    path('editar/<int:id>/', views.editar_dispositivo, name='editar_dispositivo'),
+    path('dispositivos/', views.lista_dispositivos, name='lista_dispositivos'),
+    path('dispositivos/agregar/', views.agregar_dispositivo, name='agregar_dispositivo'),
+    path('dispositivos/editar/<int:id>/', views.editar_dispositivo, name='editar_dispositivo'),
 ]
