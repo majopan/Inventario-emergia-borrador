@@ -22,7 +22,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
           onChange={(e) => setEmail(e.target.value)}
         />
         <button type="submit">Enviar</button>
-        <a href="#" onClick={onBackToLogin}>Volver al inicio de sesión</a>
+        <a href=" " onClick={onBackToLogin}>Volver al inicio de sesión</a>
       </form>
     </div>
   );

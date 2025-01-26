@@ -25,7 +25,7 @@ const Login = () => {
             <span>Iniciar sesión</span>
             <input type="username" placeholder="Nombre de usuario" />
             <input type="password" placeholder="Contraseña" />
-            <a href="#" onClick={handleForgotPasswordClick}>¿Olvidaste tu contraseña?</a>
+            <a href=" " onClick={handleForgotPasswordClick}>¿Olvidaste tu contraseña?</a>
             <button type="submit">Entrar</button>
           </form>
         </div>
