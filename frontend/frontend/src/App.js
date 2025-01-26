@@ -7,10 +7,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Ruta para la página de inicio de sesión */}
         <Route path="/" element={<Login />} />
-
-        {/* Ruta para la página de "Olvidé mi contraseña" */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </Router>
