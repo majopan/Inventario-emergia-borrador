@@ -1,46 +1,49 @@
 from django.contrib import admin
-from .models import Posicion, Dispositivo, Historial, servicios
+from .models import Sede, Servicios, Posicion, Dispositivo, Movimiento, Estadoproveedor, Historial
 
-# Registrar el modelo Posicion
-@admin.register(Posicion)
+class SedeAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'ciudad', 'direccion')
+    search_fields = ('nombre', 'ciudad')
+    list_filter = ('ciudad',)
+
+class ServiciosAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'codigo_analitico', 'sede')
+    search_fields = ('nombre', 'codigo_analitico')
+    list_filter = ('sede',)
+
 class PosicionAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'descripcion')  # Columnas que se mostrarán en la lista
-    search_fields = ('nombre',)  # Permite buscar por el campo 'nombre'
+    list_display = ('nombre', 'descripcion')
+    search_fields = ('nombre',)
+    list_filter = ('nombre',)
 
-# Registrar el modelo servicios
-@admin.register(servicios)
-class serviciosAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'codigo_analitico', 'sede')  # Columnas a mostrar
-    search_fields = ('nombre', 'codigo_analitico', 'sede')  # Campos que puedes buscar
-    list_filter = ('sede',)  # Filtro por sede
-
-# Registrar el modelo Dispositivo
-@admin.register(Dispositivo)
 class DispositivoAdmin(admin.ModelAdmin):
-    list_display = ('tipo', 'marca', 'modelo', 'serial', 'estado', 'placa_cu', 'posicion')  # Columnas a mostrar
-    search_fields = ('modelo', 'serial', 'marca')  # Campos que puedes buscar
-    list_filter = ('estado', 'marca', 'tipo')  # Filtros en el panel admin
+    list_display = ('tipo', 'marca', 'modelo', 'serial', 'razon_social', 'sede', 'estado')
+    search_fields = ('serial', 'modelo', 'marca', 'razon_social')
+    list_filter = ('tipo', 'estado', 'sede', 'razon_social', 'ubicacion')
+    list_editable = ('estado',)
+    
+    # Puedes agregar un filtro de búsqueda por 'razon_social' o 'modelo'
+    ordering = ('modelo',)
 
-    # Personalizar los formularios en el panel de administración
-    fieldsets = (
-        (None, {
-            'fields': ('tipo', 'marca', 'modelo', 'serial', 'placa_cu', 'posicion')
-        }),
-        ('Especificaciones', {
-            'fields': ('tipo_disco_duro', 'capacidad_disco_duro', 'tipo_memoria_ram', 'capacidad_memoria_ram'),
-        }),
-        ('Estado', {
-            'fields': ('estado', 'razon_social'),
-        }),
-    )
+class MovimientoAdmin(admin.ModelAdmin):
+    list_display = ('dispositivo', 'encargado', 'fecha_movimiento', 'ubicacion_origen', 'ubicacion_destino')
+    search_fields = ('dispositivo__serial', 'encargado__username', 'ubicacion_origen', 'ubicacion_destino')
+    list_filter = ('fecha_movimiento', 'ubicacion_origen', 'ubicacion_destino')
 
-    # Hacer que los dispositivos sean más fáciles de editar en línea
-    inlines = []
+class EstadoproveedorAdmin(admin.ModelAdmin):
+    list_display = ('nombre',)
+    search_fields = ('nombre',)
 
-# Registrar el modelo Historial
-@admin.register(Historial)
 class HistorialAdmin(admin.ModelAdmin):
-    list_display = ('dispositivo', 'usuario', 'fecha_modificacion', 'cambios')  # Columnas a mostrar
-    search_fields = ('dispositivo__serial', 'usuario__username')  # Permite buscar por el serial del dispositivo o el nombre del usuario
-    list_filter = ('fecha_modificacion',)  # Filtro por fecha
+    list_display = ('dispositivo', 'usuario', 'fecha_modificacion', 'tipo_cambio', 'cambios')
+    search_fields = ('dispositivo__serial', 'usuario__username', 'tipo_cambio')
+    list_filter = ('fecha_modificacion', 'tipo_cambio')
 
+# Registro de los modelos en el admin
+admin.site.register(Sede, SedeAdmin)
+admin.site.register(Servicios, ServiciosAdmin)
+admin.site.register(Posicion, PosicionAdmin)
+admin.site.register(Dispositivo, DispositivoAdmin)
+admin.site.register(Movimiento, MovimientoAdmin)
+admin.site.register(Estadoproveedor, EstadoproveedorAdmin)
+admin.site.register(Historial, HistorialAdmin)
