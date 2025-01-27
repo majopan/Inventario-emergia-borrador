@@ -75,12 +75,12 @@ class Dispositivo(models.Model):
     ]
 
     tipo = models.CharField(max_length=10, choices=TIPOS_DISPOSITIVOS)
-    estado = models.CharField(max_length=10, choices=ESTADO_DISPOSITIVO)
+    estado = models.CharField(max_length=10, choices=ESTADO_DISPOSITIVO, null=True, blank=True)
     marca = models.CharField(max_length=10, choices=FABRICANTES)
-    razon_social = models.CharField(max_length=10, choices=REGIMENES)
+    razon_social = models.CharField(max_length=10, choices=REGIMENES, null=True, blank=True)
     modelo = models.CharField(max_length=50)
     serial = models.CharField(max_length=50, unique=True)
-    placa_cu = models.CharField(max_length=50, unique=True)
+    placa_cu = models.CharField(max_length=50, unique=True, null=True, blank=True)
     posicion = models.ForeignKey(Posicion, on_delete=models.SET_NULL, null=True, blank=True)
 
     tipo_disco_duro = models.CharField(max_length=10, choices=TIPOS_DISCO_DURO, null=True, blank=True)
