@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Posicion, Dispositivo, Historial
+from .models import Posicion, Dispositivo, Historial , servicios
 
 # Registrar el modelo Posicion
 @admin.register(Posicion)

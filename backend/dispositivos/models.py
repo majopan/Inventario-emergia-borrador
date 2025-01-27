@@ -10,6 +10,16 @@ class Posicion(models.Model):
     def __str__(self):
         return self.nombre
 
+
+class servicios(models.Model):
+    nombre = models.CharField(max_length=100)
+    codigo_analitico = models.TextField(null=True, blank=True)
+    sede = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.nombre
+
+
 class Dispositivo(models.Model):
     TIPOS_DISPOSITIVOS = [
         ('CPU', 'Computador'),
