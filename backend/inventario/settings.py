@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-tawsmg2jjoh=w$t*!j7q92r8odgjz@l5tk1gz!&4lnnza_s051
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -37,32 +37,35 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'dispositivos',
-    'widget_tweaks',
-    'corsheaders',
-
+    'rest_framework',  # Django REST Framework
+    'dispositivos',    # Tu aplicación de dispositivos
+    'widget_tweaks',   # Para facilitar manejo de formularios
+    'corsheaders',     # Para gestionar CORS
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORS middleware antes de common middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
+# CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = True
+
+# Custom User Model
+AUTH_USER_MODEL = 'dispositivos.RolUser'  # Modelo personalizado para usuario
 
 ROOT_URLCONF = 'inventario.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # Añadir un directorio para plantillas personalizadas
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -111,11 +114,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es'  # Cambiado a español
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
+
+USE_L10N = True  # Para manejar formatos de números y fechas localizados
 
 USE_TZ = True
 
@@ -123,21 +128,26 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+# Media files (para subir archivos)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# Logging Configuration
 LOGGING = {
     'version': 1,
     'handlers': {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'debug.log',
+            'filename': BASE_DIR / 'debug.log',
         },
     },
     'loggers': {
@@ -149,9 +159,10 @@ LOGGING = {
     },
 }
 
+# Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'emergiainventario@gmail.com'
-EMAIL_HOST_PASSWORD = 'kygs hzei ksrb brsy' # Contraseña de la cuenta de correo
+EMAIL_HOST_PASSWORD = 'kygs hzei ksrb brsy'  # Contraseña de la cuenta de correo

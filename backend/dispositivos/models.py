@@ -1,7 +1,52 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser, User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.conf import settings
+
+
+
+class RolUser(AbstractUser):
+    """
+    Modelo de usuario personalizado basado en AbstractUser.
+    """
+    ROLES_CHOICES = [
+        ('admin', 'Administrador'),
+        ('coordinador', 'Coordinador'),
+    ]
+    # Campo para roles de usuario
+    rol = models.CharField(max_length=15, choices=ROLES_CHOICES, default='coordinador')
+
+    # Campos adicionales
+    nombre = models.CharField("Nombre completo", max_length=150, blank=True, null=True)
+    celular = models.CharField("Celular", max_length=15, blank=True, null=True)
+    documento = models.CharField("Documento de identificación", max_length=50, blank=True, null=True)
+    email = models.EmailField("Correo electrónico", unique=True)
+
+    # Evitar conflictos con los nombres de relaciones
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='custom_user_set',
+        blank=True,
+        help_text='Los grupos a los que pertenece este usuario.',
+        related_query_name='custom_user',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='custom_user_set',
+        blank=True,
+        help_text='Permisos específicos para este usuario.',
+        related_query_name='custom_user',
+    )
+
+    def __str__(self):
+        return f"{self.nombre} ({self.username})" if self.nombre else self.username
+
+    class Meta:
+        verbose_name = "Usuario"
+        verbose_name_plural = "Usuarios"
+        ordering = ['id']
+
 
 class Sede(models.Model):
     nombre = models.CharField(max_length=100)
@@ -151,7 +196,7 @@ class Dispositivo(models.Model):
 
 class Movimiento(models.Model):
     dispositivo = models.ForeignKey(Dispositivo, on_delete=models.CASCADE)
-    encargado = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    encargado = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     fecha_movimiento = models.DateTimeField(auto_now_add=True)
     ubicacion_origen = models.CharField(max_length=50)
     ubicacion_destino = models.CharField(max_length=50)
@@ -165,20 +210,18 @@ class Movimiento(models.Model):
         verbose_name_plural = "Movimientos"
 
 
-class Estadoproveedor(models.Model):
-    nombre = models.CharField(max_length=100)
 
-    def __str__(self):
-        return self.nombre
-
-    class Meta:
-        verbose_name = "Estado de Proveedor"
-        verbose_name_plural = "Estados de Proveedor"
+@receiver(post_save, sender=Movimiento)
+def handle_movimiento_post_save(sender, instance, created, **kwargs):
+    if created:
+        print(f"Nuevo movimiento creado: {instance}")
+    else:
+        print(f"Movimiento actualizado: {instance}")
 
 
 class Historial(models.Model):
     dispositivo = models.ForeignKey(Dispositivo, on_delete=models.CASCADE)
-    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     fecha_modificacion = models.DateTimeField(auto_now=True)
     cambios = models.TextField()
     tipo_cambio = models.CharField(max_length=100, default='Movimiento registrado')
@@ -196,25 +239,17 @@ def crear_historial_por_movimiento(sender, instance, created, **kwargs):
     if created:
         dispositivo = instance.dispositivo
         usuario = instance.encargado
-        cambios = f"El dispositivo {dispositivo.serial} ha cambiado de ubicación de {instance.ubicacion_origen} a {instance.ubicacion_destino}."
-        
+        cambios = f"El dispositivo {dispositivo.serial} cambió de {instance.ubicacion_origen} a {instance.ubicacion_destino}."
         Historial.objects.create(
             dispositivo=dispositivo,
             usuario=usuario,
             cambios=cambios,
             tipo_cambio='Movimiento registrado'
         )
+        
+class Estadoproveedor(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+    descripcion = models.TextField(blank=True, null=True)
 
-
-
-    """
-    roles(
-    admin
-    coordinador)
-    espacios que debe tener(
-    nombres
-    celular
-    documento
-    email
-    password)
-    """
+    def __str__(self):
+        return self.nombre
