@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin # type: ignore
 from .models import Posicion, Dispositivo, Historial, servicios
 
 # Registrar el modelo Posicion
