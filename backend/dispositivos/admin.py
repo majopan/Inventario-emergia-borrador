@@ -1,8 +1,16 @@
 from django.contrib import admin # type: ignore
-from .models import Posicion, Dispositivo, Historial, servicios
+from .models import Sede, Servicios, Posicion, Dispositivo, Movimiento, Estadoproveedor, Historial
 
-# Registrar el modelo Posicion
-@admin.register(Posicion)
+class SedeAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'ciudad', 'direccion')
+    search_fields = ('nombre', 'ciudad')
+    list_filter = ('ciudad',)
+
+class ServiciosAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'codigo_analitico', 'sede')
+    search_fields = ('nombre', 'codigo_analitico')
+    list_filter = ('sede',)
+
 class PosicionAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'descripcion')
     search_fields = ('nombre',)
@@ -19,7 +27,7 @@ class DispositivoAdmin(admin.ModelAdmin):
 
 class MovimientoAdmin(admin.ModelAdmin):
     list_display = ('dispositivo', 'encargado', 'fecha_movimiento', 'ubicacion_origen', 'ubicacion_destino')
-    search_fields = ('dispositivo__serial', 'encargado__username', 'ubicacion_origen', 'ubicacion_destino')
+    search_fields = ('dispositivo_serial', 'encargado_username', 'ubicacion_origen', 'ubicacion_destino')
     list_filter = ('fecha_movimiento', 'ubicacion_origen', 'ubicacion_destino')
 
 class EstadoproveedorAdmin(admin.ModelAdmin):
@@ -28,7 +36,7 @@ class EstadoproveedorAdmin(admin.ModelAdmin):
 
 class HistorialAdmin(admin.ModelAdmin):
     list_display = ('dispositivo', 'usuario', 'fecha_modificacion', 'tipo_cambio', 'cambios')
-    search_fields = ('dispositivo__serial', 'usuario__username', 'tipo_cambio')
+    search_fields = ('dispositivo_serial', 'usuario_username', 'tipo_cambio')
     list_filter = ('fecha_modificacion', 'tipo_cambio')
 
 # Registro de los modelos en el admin
