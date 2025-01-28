@@ -20,7 +20,6 @@ from dispositivos import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('dispositivos/', views.lista_dispositivos, name='lista_dispositivos'),
-    path('dispositivos/agregar/', views.agregar_dispositivo, name='agregar_dispositivo'),
-    path('dispositivos/editar/<int:id>/', views.editar_dispositivo, name='editar_dispositivo'),
+    path('api/login/', views.login_view, name='login'),
+    path('api/reset-password/', views.reset_password_request, name='reset-password-request'),
 ]
