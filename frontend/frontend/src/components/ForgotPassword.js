@@ -1,25 +1,48 @@
 import React, { useState } from "react";
 import { ReactComponent as Logo } from '../assets/logo.svg';
 import EInventoryLogo from '../assets/E-Inventory.png';
-import { Link } from "react-router-dom"; // Importa Link de react-router-dom
-import '../styles/ForgotPassword.css';  // Asegúrate de importar este archivo
+import { Link } from "react-router-dom";
+import '../styles/ForgotPassword.css';
 
 const ForgotPassword = ({ onBackToLogin }) => {
   const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí iría la lógica para enviar la solicitud de restablecimiento de contraseña
-    console.log("Restablecer contraseña para:", email);
+    try {
+      const response = await fetch('http://localhost:8000/api/reset-password/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMessage(data.message);
+        setError("");
+      } else {
+        setError(data.error || "Ocurrió un error");
+        setMessage("");
+      }
+    } catch (err) {
+      setError("Error de conexión con el servidor");
+      setMessage("");
+    }
   };
 
   return (
     <div className="container">
-      <div className="formw"> {/* Aplica la clase .formw aquí */}
+      <div className="formw">
         <div className="forgot-password-container">
           <form onSubmit={handleSubmit}>
             <Logo className="logo" style={{ width: '220px', height: 'auto', padding: '10px' }} />
             <span>Restablecer tu contraseña</span>
+            {message && <p className="success-message">{message}</p>}
+            {error && <p className="error-message">{error}</p>}
             <input
               type="email"
               placeholder="Correo electrónico"
