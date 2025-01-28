@@ -30,6 +30,13 @@ class Servicios(models.Model):
 
 
 class Posicion(models.Model):
+    PISOS = [
+        ('PISO1', 'Piso 1'),
+        ('PISO2', 'Piso 2'),
+        ('PISO3', 'Piso 3'),
+        ('PISO4', 'Piso 4'),
+    ]
+    piso = models.CharField(max_length=5, choices=PISOS)
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(null=True, blank=True)
 
@@ -197,3 +204,17 @@ def crear_historial_por_movimiento(sender, instance, created, **kwargs):
             cambios=cambios,
             tipo_cambio='Movimiento registrado'
         )
+
+
+
+    """
+    roles(
+    admin
+    coordinador)
+    espacios que debe tener(
+    nombres
+    celular
+    documento
+    email
+    password)
+    """
