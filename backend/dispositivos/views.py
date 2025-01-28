@@ -1,11 +1,11 @@
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.utils.crypto import get_random_string
 import logging
+from .models import RolUser  # Asegúrate de que RolUser esté correctamente configurado
 
 # Configuración de logging
 logger = logging.getLogger(__name__)
@@ -26,70 +26,65 @@ def login_view(request):
     if user is not None:
         return Response({"message": "Inicio de sesión exitoso", "username": user.username})
     else:
-        return Response({"error": "Credenciales inválidas"}, status=401)
+        return Response({"error": "Credenciales inválidas."}, status=401)
 
 
-# Vista para solicitar un restablecimiento de contraseña
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
+from django.conf import settings
+from .models import RolUser
+
 @api_view(['POST'])
 def reset_password_request(request):
-    """
-    Envía un enlace de restablecimiento de contraseña al correo electrónico del usuario.
-    """
     email = request.data.get('email', '').strip().lower()  # Normaliza el correo
-    logger.info(f"Solicitud de restablecimiento para: {email}")
-
     if not email:
-        return Response({"error": "El correo es obligatorio."}, status=400)
+        return Response({"error": "El correo es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        user = User.objects.get(email=email)
+        user = RolUser.objects.get(email=email)
+    except RolUser.DoesNotExist:
+        return Response({"error": "El correo no está registrado."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Genera el enlace para restablecer la contraseña
-        token = get_random_string(length=32)  # Opcional: puedes generar un token seguro
-        reset_url = f"http://localhost:3000/reset-password?email={email}&token={token}"
-
-        # Envía el correo
+    # Envía el correo sin necesidad de token
+    try:
+        # Código que puede generar una excepción
         subject = "Restablece tu contraseña"
-        message = f"Hola {user.username},\n\nUsa el siguiente enlace para restablecer tu contraseña:\n{reset_url}\n\nSi no solicitaste esto, ignora este correo."
-        send_mail(subject, message, 'emergiainventario@gmail.com', [email])
-
-        logger.info(f"Correo de restablecimiento enviado a: {email}")
-        return Response({"message": "Revisa tu correo para restablecer la contraseña."})
-    except User.DoesNotExist:
-        logger.warning(f"Intento de restablecimiento para correo no registrado: {email}")
-        return Response({"error": "El correo no está registrado."}, status=404)
+        message = f"""
+        Hola {user.nombre or user.email},
+        
+        Usa el siguiente enlace para restablecer tu contraseña:
+        {settings.FRONTEND_URL}/reset-password?email={email}
+        
+        Si no solicitaste este cambio, ignora este correo.
+        """
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+        return Response({"message": "Revisa tu correo para restablecer la contraseña."}, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f"Error al procesar la solicitud de restablecimiento: {str(e)}")
-        return Response({"error": "Ocurrió un error. Intenta nuevamente más tarde."}, status=500)
+        return Response({"error": f"Error al enviar el correo: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# Vista para cambiar la contraseña
+from django.contrib.auth.hashers import make_password
+
 @api_view(['POST'])
 def reset_password(request):
-    """
-    Cambia la contraseña de un usuario utilizando su correo electrónico.
-    """
     email = request.data.get('email', '').strip().lower()
     new_password = request.data.get('password', '').strip()
 
     if not email or not new_password:
-        return Response({"error": "Correo y nueva contraseña son obligatorios."}, status=400)
+        return Response({"error": "Correo y nueva contraseña son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
 
     if len(new_password) < 8:
-        return Response({"error": "La contraseña debe tener al menos 8 caracteres."}, status=400)
+        return Response({"error": "La contraseña debe tener al menos 8 caracteres."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        user = User.objects.get(email=email)
-
-        # Actualiza la contraseña del usuario
+        user = RolUser.objects.get(email=email)
         user.password = make_password(new_password)
         user.save()
-
-        logger.info(f"Contraseña actualizada correctamente para: {email}")
-        return Response({"message": "Contraseña cambiada exitosamente."})
-    except User.DoesNotExist:
-        logger.warning(f"Intento de cambio de contraseña para correo no registrado: {email}")
-        return Response({"error": "El correo no está registrado."}, status=404)
+        return Response({"message": "Contraseña cambiada exitosamente."}, status=status.HTTP_200_OK)
+    except RolUser.DoesNotExist:
+        return Response({"error": "El correo no está registrado."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        logger.error(f"Error al cambiar la contraseña: {str(e)}")
-        return Response({"error": "Ocurrió un error. Intenta nuevamente más tarde."}, status=500)
+        return Response({"error": f"Error al cambiar la contraseña: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
