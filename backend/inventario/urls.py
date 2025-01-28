@@ -21,5 +21,6 @@ from dispositivos import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/login/', views.login_view, name='login'),
-    path('api/reset-password/', views.reset_password_request, name='reset-password-request'),
+    path('api/reset-password-request/', views.reset_password_request, name='reset_password_request'),
+    path('api/reset-password/', views.reset_password, name='reset_password'),  # Asegúrate de tener esta ruta
 ]
