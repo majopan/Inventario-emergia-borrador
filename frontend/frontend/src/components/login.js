@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ReactComponent as Logo } from '../assets/logo.svg';
 import EInventoryLogo from '../assets/E-Inventory.png';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import '../styles/Login.css';
 
 import ForgotPassword from './ForgotPassword';
@@ -11,6 +11,7 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // Hook para redirección
 
   const handleForgotPasswordClick = () => {
     setForgotPassword(true);
@@ -34,7 +35,7 @@ const Login = () => {
       const data = await response.json();
       if (response.ok) {
         alert(`Bienvenido ${data.username}`);
-        // Redirige al usuario a otra página, si es necesario
+        navigate('/dashboard'); // Redirigir al dashboard
       } else {
         setError(data.error || 'Error desconocido');
       }
