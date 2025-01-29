@@ -48,22 +48,26 @@ def reset_password_request(request):
     except RolUser.DoesNotExist:
         return Response({"error": "El correo no está registrado."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Envía el correo sin necesidad de token
     try:
         # Código que puede generar una excepción
         subject = "Restablece tu contraseña"
         message = f"""
         Hola {user.nombre or user.email},
-        
+
         Usa el siguiente enlace para restablecer tu contraseña:
         {settings.FRONTEND_URL}/reset-password?email={email}
-        
+
         Si no solicitaste este cambio, ignora este correo.
         """
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+
+        # Este return debe estar dentro de la función, bien indentado
         return Response({"message": "Revisa tu correo para restablecer la contraseña."}, status=status.HTTP_200_OK)
+
     except Exception as e:
         return Response({"error": f"Error al enviar el correo: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 from django.contrib.auth.hashers import make_password
