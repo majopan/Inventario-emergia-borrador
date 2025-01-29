@@ -62,7 +62,7 @@ def reset_password_request(request):
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
 
         # Este return debe estar dentro de la función, bien indentado
-        return Response({"message": "Revisa tu correo para restablecer la contraseña."}, status=status.HTTP_200_OK)
+        return Response({"message": "Revisa tu correo."}, status=status.HTTP_200_OK)
 
     except Exception as e:
         return Response({"error": f"Error al enviar el correo: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
