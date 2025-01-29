@@ -91,10 +91,15 @@ WSGI_APPLICATION = 'inventario.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'inventarioemergia',
+        'USER': 'postgres',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',  # o la IP de tu servidor PostgreSQL
+        'PORT': '5433',
     }
 }
+
 
 
 # Password validation
