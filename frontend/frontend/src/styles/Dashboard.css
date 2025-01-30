@@ -1,73 +1,47 @@
-/* Dashboard.css */
 .dashboard-container {
   display: flex;
-  height: 100vh;
-  width: 100vw;
+  height: 100vh; /* Ocupa el 100% de la altura de la ventana */
+  width: 100vw; /* Ocupa el 100% del ancho de la ventana */
   background-color: #2b2f42;
-  flex-direction: column
+  flex-direction: column; /* Mantener los elementos apilados */
+  overflow: hidden; /* Evita el desbordamiento */
+  overflow-y: auto; /* Permite el desplazamiento vertical si el contenido es demasiado largo */
+
 }
 
 .dashboard-content {
   flex: 1; /* Esto hace que el contenido ocupe el resto del espacio */
+  padding: 20px; /* Añade un poco de padding para evitar que el contenido toque los bordes */
 }
 
 .dashboard-image-container {
-  flex: 1;
-  margin-left: 120px;
+  flex: 1; /* Asegura que la imagen ocupe el espacio necesario */
+  margin-left: 120px; /* Mueve la imagen a la derecha */
 }
 
 .dashboard-image {
-  width: 40%; /* La imagen ocupará todo el espacio disponible */
+  width: 40%; /* La imagen ocupará el 40% del ancho disponible */
   max-width: 80%; /* La imagen no se desbordará */
   max-height: 80%; /* La imagen no se desbordará */
   object-fit: cover; /* Mantiene la proporción de la imagen */
 }
 
-/* Contenedor de las cards en fila */
-.cards-container {
-  display: flex;
-  margin-top: 30px; /* Espacio entre la imagen y las cards */
-  width: 80%; /* Las cards ocupan el 80% del ancho disponible */
-  gap: 30px; /* Espacio de 3px entre las cards */
-  margin-left: 130px;
+/* Si quieres mantener la estructura fija cuando agregues más elementos */
+.dashboard-container > * {
+  margin-bottom: 20px; /* Añadir algo de espacio entre cada componente */
 }
 
-.card {
-  background-color: #353a50;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  width: 30%; /* Las cards ocuparán el 30% del ancho */
-  position: relative; /* Permite el posicionamiento absoluto del icono */
+.dashboard-container > *:last-child {
+  margin-bottom: 0; /* Elimina el margen inferior del último elemento */
 }
 
-.card h5 {
-  font-size: 15px;
-  color: #fff;
-  margin-bottom: 10px;
-  margin-right: 70px;
-}
+/* Estilos opcionales de responsividad (si quieres que la estructura cambie en pantallas pequeñas) */
+@media screen and (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column; /* Se asegura que se mantenga en columna */
+  }
 
-.card h1 {
-  font-size: 35px;
-  color: #fff;
-  margin: 5px 0;
+  .dashboard-image-container {
+    margin-left: 0; /* Eliminar el margen en pantallas pequeñas */
+  }
 }
-
-.card p {
-  font-size: 16px;
-  color: #fff;
-  margin: 5px 0;
-  text-align: right;
-}
-
-/* Estilos para el icono en la parte superior derecha de la card */
-.card-icon {
-  position: absolute;
-  border-radius: 8px;
-  top: 10px; /* Ajusta la distancia desde el borde superior */
-  right: 10px; /* Ajusta la distancia desde el borde derecho */
-  width: 40px; /* Tamaño del icono */
-  height: 40px; /* Tamaño del icono */
-}
-

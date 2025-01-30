@@ -7,13 +7,13 @@ import '../styles/Dashboard.css';
 const Dashboard = () => {
   return (
     <>
-    <SidebarMenu />
-    <div>
-    <div className="dashboard-container">
-      <DashboardContent />
-      <Grafica />
-    </div>
-    </div>
+      <SidebarMenu />
+      <div className="main-container">
+        <div className="dashboard-container">
+          <DashboardContent />
+          <Grafica />
+        </div>
+      </div>
     </>
   );
 };
