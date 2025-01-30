@@ -8,7 +8,7 @@ import logging
 from .models import RolUser  # Asegúrate de que RolUser esté correctamente configurado
 
 # Configuración de logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(_name_)
 
 # Vista para el inicio de sesión
 @api_view(['POST'])
