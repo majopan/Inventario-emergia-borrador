@@ -52,6 +52,25 @@
   object-fit: cover; /* Mantiene la proporción de la imagen */
 }
 
+/* Contenedor para las dos gráficas (DowntimeCharts y CustomLineChart) */
+.charts-row {
+  display: flex;
+  justify-content: space-between; /* Espacio entre las gráficas */
+  align-items: stretch; /* Asegura que ambas gráficas tengan la misma altura */
+  width: 100%;
+  max-width: 1200px; /* Ajusta el ancho máximo según sea necesario */
+  margin: 20px 0; /* Espacio arriba y abajo */
+  gap: 20px; /* Espacio entre las gráficas */
+}
+
+/* Ajustes para cada gráfica dentro del contenedor */
+.charts-row > * {
+  flex: 1; /* Cada gráfica ocupa el mismo espacio */
+  background-color: #353a50; /* Fondo para las gráficas */
+  border-radius: 10px; /* Bordes redondeados */
+  padding: 20px; /* Espaciado interno */
+}
+
 /* Si quieres mantener la estructura fija cuando agregues más elementos */
 .dashboard-container > * {
   margin-bottom: 20px; /* Añadir algo de espacio entre cada componente */
@@ -81,5 +100,14 @@
 
   .dashboard-image-container {
     margin-left: 0; /* Eliminar el margen en pantallas pequeñas */
+  }
+
+  .charts-row {
+    flex-direction: column; /* Cambia a columna en pantallas pequeñas */
+    gap: 10px; /* Reduce el espacio entre las gráficas */
+  }
+
+  .charts-row > * {
+    width: 100%; /* Cada gráfica ocupa todo el ancho en pantallas pequeñas */
   }
 }
