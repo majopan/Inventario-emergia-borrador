@@ -177,10 +177,10 @@ LOGGING = {
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.emergiacc.com'  # ⚠️ Cambia esto según tu proveedor
-EMAIL_PORT = 587  # Usualmente 587 para TLS o 465 para SSL
-EMAIL_USE_TLS = True  # True si usas el puerto 587
-EMAIL_USE_SSL = False  # False si usas TLS, True si usas SSL (465)
+EMAIL_HOST = 'smtp.gmail.com'  # ⚠️ Cambia esto según tu proveedor
+EMAIL_PORT = 465  # Usualmente 587 para TLS o 465 para SSL
+EMAIL_USE_TLS = False  # True si usas el puerto 587
+EMAIL_USE_SSL = True   # False si usas TLS, True si usas SSL (465)
 EMAIL_HOST_USER = 'e-inventory@emergiacc.com'
 EMAIL_HOST_PASSWORD = 'ikdu yztg avoj tasc'  # O una contraseña de aplicación si usas Google
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
