@@ -55,6 +55,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
   };
 
   return (
+  <div className="forgot-password">
     <div className="container">
       <div className="formw">
         <div className="forgot-password-container">
@@ -97,6 +98,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
         </div>
       </div>
     </div>
+  </div>
   );
 };
 

@@ -1,26 +1,26 @@
-    /* Dashboard.css */
-
+    /* Ajustes para la gráfica debajo de las cards */
+    .chart-wrapper {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    
     .barchart-container {
-        background-color: #353a50; /* Fondo oscuro tipo consola */
-        padding: 20px;
+        background-color: #353a50;
+        padding: 30px;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         color: #fff;
-        margin: 30px auto;
-        width: 90%;
+        width: 100%;
+        max-width: 900px;
+        margin-left: 200px;
+        margin-top: 30px;
     }
     
     .barchart-container h3 {
         text-align: center;
-        color: #61dafb; /* Azul claro tipo terminal */
+        color: #61dafb;
         margin-bottom: 15px;
-    }
-    
-    .chart-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
     }
     
     .recharts-cartesian-grid line {

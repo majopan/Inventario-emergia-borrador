@@ -6,11 +6,15 @@ import '../styles/Dashboard.css';
 
 const Dashboard = () => {
   return (
+    <>
+    <SidebarMenu />
+    <div>
     <div className="dashboard-container">
-      <SidebarMenu />
       <DashboardContent />
       <Grafica />
     </div>
+    </div>
+    </>
   );
 };
 
