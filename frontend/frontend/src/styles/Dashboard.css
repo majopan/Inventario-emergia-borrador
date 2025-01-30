@@ -1,115 +1,13 @@
-    /* Estructura general */
-    .dashboard-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        background-color: #f9f9f9;
-        font-family: Arial, sans-serif;
-    }
-    
-    /* Encabezado */
-    .dashboard-header {
-        background-color: #3a86ff;
-        color: white;
-        padding: 1rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .dashboard-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-    }
-    
-    .dashboard-nav .nav-links {
-        list-style: none;
-        display: flex;
-        gap: 1rem;
-        margin: 0;
-        padding: 0;
-    }
-    
-    .nav-button {
-        background-color: #ffffff;
-        color: #3a86ff;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: background-color 0.3s ease;
-    }
-    
-    .nav-button:hover {
-        background-color: #dbeafe;
-    }
-    
-    .logout-button {
-        background-color: #ff4d4f;
-        color: white;
-    }
-    
-    .logout-button:hover {
-        background-color: #ff7875;
-    }
-    
-    /* Contenido principal */
-    .dashboard-main {
-        flex: 1;
-        padding: 2rem;
-    }
-    
-    .welcome-section {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    
-    .welcome-section h2 {
-        font-size: 2rem;
-        color: #3a86ff;
-    }
-    
-    .welcome-section p {
-        font-size: 1rem;
-        color: #555555;
-    }
-    
-    /* Sección de estadísticas */
-    .stats-section {
-        display: flex;
-        gap: 2rem;
-        justify-content: center;
-    }
-    
-    .stats-card {
-        background-color: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        padding: 1rem 2rem;
-        text-align: center;
-        flex: 1;
-        max-width: 300px;
-    }
-    
-    .stats-card h3 {
-        font-size: 1.25rem;
-        color: #333333;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stats-card p {
-        font-size: 2rem;
-        color: #3a86ff;
-        font-weight: bold;
-    }
-    
-    /* Footer */
-    .dashboard-footer {
-        background-color: #3a86ff;
-        color: white;
-        text-align: center;
-        padding: 0.5rem;
-        font-size: 0.9rem;
-    }
-    
+/* Dashboard.css */
+
+.dashboard-container {
+    display: flex;
+    height: 100vh; /* Asegura que ocupe toda la altura de la pantalla */
+    width: 100vw; /* Asegura que ocupe toda la anchura de la pantalla */
+  }
+  
+  .dashboard-content {
+    flex: 1; /* Esto hace que el contenido ocupe el resto del espacio */
+    background-color: #f4f4f4;
+  }
+  
