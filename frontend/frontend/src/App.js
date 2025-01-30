@@ -1,18 +1,18 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./components/login";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
-import Dashboard from './components/Dashboard';
 import SidebarMenu from './components/SidebarMenu'; // Importa SidebarMenu
 
 // Nuevas páginas
-import Inventory from './components/Inventory';
-import Settings from './components/Settings'; // No agregar la extensión .js
-import Plans from './components/Plans';
-import Records from './components/Records';
-import History from './components/History';
-import Devices from './components/Devices'; // Elimina .js
+import Login from "./pages/login";
+import Dashboard from './pages/Dashboard';
+import Inventory from './pages/Inventory';
+import Settings from './pages/Settings'; // No agregar la extensión .js
+import Plans from './pages/Plans';
+import Records from './pages/Records';
+import History from './pages/History';
+import Devices from './pages/Devices'; // Elimina .js
 
 function App() {
   return (
@@ -91,5 +91,6 @@ function App() {
     </Router>
   );
 }
+
 
 export default App;

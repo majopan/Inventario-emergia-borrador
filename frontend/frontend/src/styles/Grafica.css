@@ -1,0 +1,44 @@
+    /* Dashboard.css */
+
+    .barchart-container {
+        background-color: #353a50; /* Fondo oscuro tipo consola */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        color: #fff;
+        margin: 30px auto;
+        width: 90%;
+    }
+    
+    .barchart-container h3 {
+        text-align: center;
+        color: #61dafb; /* Azul claro tipo terminal */
+        margin-bottom: 15px;
+    }
+    
+    .chart-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .recharts-cartesian-grid line {
+        stroke: rgba(255, 255, 255, 0.315);
+    }
+    
+    .recharts-tooltip-wrapper {
+        background-color: #222 !important;
+        border: 1px solid #61dafb !important;
+        color: #fff !important;
+    }
+    
+    .recharts-legend-item text {
+        fill: #61dafb !important;
+        font-weight: bold;
+    }
+    
+    .recharts-bar-rectangle {
+        stroke-width: 2;
+    }
+    

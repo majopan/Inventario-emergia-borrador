@@ -1,13 +1,71 @@
 /* Dashboard.css */
-
 .dashboard-container {
-    display: flex;
-    height: 100vh; /* Asegura que ocupe toda la altura de la pantalla */
-    width: 100vw; /* Asegura que ocupe toda la anchura de la pantalla */
-  }
-  
-  .dashboard-content {
-    flex: 1; /* Esto hace que el contenido ocupe el resto del espacio */
-    background-color: #f4f4f4;
-  }
-  
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: #2b2f42;
+}
+
+.dashboard-content {
+  flex: 1; /* Esto hace que el contenido ocupe el resto del espacio */
+}
+
+.dashboard-image-container {
+  flex: 1;
+  margin-left: 120px;
+}
+
+.dashboard-image {
+  width: 40%; /* La imagen ocupará todo el espacio disponible */
+  max-width: 80%; /* La imagen no se desbordará */
+  max-height: 80%; /* La imagen no se desbordará */
+  object-fit: cover; /* Mantiene la proporción de la imagen */
+}
+
+/* Contenedor de las cards en fila */
+.cards-container {
+  display: flex;
+  margin-top: 30px; /* Espacio entre la imagen y las cards */
+  width: 80%; /* Las cards ocupan el 80% del ancho disponible */
+  gap: 30px; /* Espacio de 3px entre las cards */
+  margin-left: 130px;
+}
+
+.card {
+  background-color: #353a50;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 30%; /* Las cards ocuparán el 30% del ancho */
+  position: relative; /* Permite el posicionamiento absoluto del icono */
+}
+
+.card h5 {
+  font-size: 15px;
+  color: #fff;
+  margin-bottom: 10px;
+  margin-right: 70px;
+}
+
+.card h1 {
+  font-size: 35px;
+  color: #fff;
+  margin: 5px 0;
+}
+
+.card p {
+  font-size: 16px;
+  color: #fff;
+  margin: 5px 0;
+  text-align: right;
+}
+
+/* Estilos para el icono en la parte superior derecha de la card */
+.card-icon {
+  position: absolute;
+  border-radius: 8px;
+  top: 10px; /* Ajusta la distancia desde el borde superior */
+  right: 10px; /* Ajusta la distancia desde el borde derecho */
+  width: 40px; /* Tamaño del icono */
+  height: 40px; /* Tamaño del icono */
+}
