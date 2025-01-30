@@ -8,7 +8,8 @@ import logging
 from .models import RolUser  # Asegúrate de que RolUser esté correctamente configurado
 
 # Configuración de logging
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
+
 
 # Vista para el inicio de sesión
 @api_view(['POST'])
@@ -41,31 +42,44 @@ from .models import RolUser
 def reset_password_request(request):
     email = request.data.get('email', '').strip().lower()  # Normaliza el correo
     if not email:
-        return Response({"error": "El correo es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El correo es un campo obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         user = RolUser.objects.get(email=email)
     except RolUser.DoesNotExist:
-        return Response({"error": "El correo no está registrado."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "El correo no existe."}, status=status.HTTP_404_NOT_FOUND)
 
     try:
-        # Código que puede generar una excepción
-        subject = "Restablece tu contraseña"
+        subject = "Solicitud de restablecimiento de contraseña"
         message = f"""
-        Hola {user.nombre or user.email},
+        Estimado/a {user.username or user.email},
 
-        Usa el siguiente enlace para restablecer tu contraseña:
+        Hemos recibido una solicitud para restablecer la contraseña asociada a tu cuenta. Si fuiste tú quien solicitó este cambio, te pedimos que sigas los pasos indicados a continuación para completar el proceso de restablecimiento:
+
+        1. Haz clic en el siguiente enlace para acceder a la página de restablecimiento de contraseña:  
         {settings.FRONTEND_URL}/reset-password?email={email}
+        
+        2. Ingresa tu nueva contraseña en el formulario proporcionado. Asegúrate de que tu nueva contraseña cumpla con los requisitos de seguridad: 
+            - Al menos 8 caracteres
+            - Una combinación de letras, números y caracteres especiales
+        
+        3. Una vez que hayas ingresado tu nueva contraseña, haz clic en el botón de "Restablecer contraseña" para finalizar el proceso.
 
-        Si no solicitaste este cambio, ignora este correo.
+        Si no solicitaste este cambio, por favor ignora este correo. No se realizarán modificaciones en tu cuenta y no se enviarán más correos de restablecimiento.
+
+        Si tienes algún problema o no estás seguro de haber recibido este correo de manera legítima, por favor, contacta con nuestro equipo de soporte para recibir asistencia.
+
+        Saludos cordiales,
+        El equipo de soporte
         """
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
 
-        # Este return debe estar dentro de la función, bien indentado
-        return Response({"message": "Revisa tu correo."}, status=status.HTTP_200_OK)
+        return Response({"message": "Revisa tu correo electrónico."}, status=status.HTTP_200_OK)
 
     except Exception as e:
-        return Response({"error": f"Error al enviar el correo: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Error al enviar el correo: {str(e)}")
+        return Response({"error": "Ocurrió un error al procesar tu solicitud. Por favor, inténtalo de nuevo más tarde."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 
