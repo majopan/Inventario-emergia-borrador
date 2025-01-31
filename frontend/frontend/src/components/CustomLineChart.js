@@ -54,12 +54,12 @@ const CustomLineChart = () => {
           <Line 
             type="monotone" 
             dataKey="y" 
-            stroke="#d7411d" // Color de la línea: #d7411d
+            stroke="#8884d8" // Color de la línea: #8884d8
             strokeWidth={2} // Grosor de la línea
             activeDot={{ 
               r: 8, // Tamaño del punto activo
-              fill: '#522db2', // Color del punto activo: #522db2
-              stroke: '#ff8900', // Borde del punto activo: #ff8900
+              fill: '#ffc658', // Color del punto activo: #522db2
+              stroke: '#82ca9d', // Borde del punto activo: #ff8900
             }} 
           />
         </LineChart>

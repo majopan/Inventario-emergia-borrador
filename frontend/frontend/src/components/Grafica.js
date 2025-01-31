@@ -21,9 +21,9 @@ const BarChartComponent = () => {
                         <YAxis dataKey="name" type="category" />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="Series1" fill="#d7411d" /> {/* Color: #d7411d */}
-                        <Bar dataKey="Series2" fill="#522db2" /> {/* Color: #522db2 */}
-                        <Bar dataKey="Series3" fill="#ff8900" /> {/* Color: #ff8900 */}
+                        <Bar dataKey="Series1" fill="#8884d8" /> {/* Color: #8884d8 */}
+                        <Bar dataKey="Series2" fill="#82ca9d" /> {/* Color: #82ca9d */}
+                        <Bar dataKey="Series3" fill="#ffc658" /> {/* Color: #ffc658 */}
                     </BarChart>
                 </ResponsiveContainer>
             </div>
