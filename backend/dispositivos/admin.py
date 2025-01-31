@@ -7,13 +7,14 @@ from .models import Sede, Servicios, Posicion, Dispositivo, Movimiento, Estadopr
 class RolUserAdmin(UserAdmin):
     list_display = ('username', 'rol', 'nombre', 'email', 'celular', 'documento', 'is_active', 'is_staff')
     search_fields = ('username', 'nombre', 'email', 'documento')
-    list_filter = ('rol', 'is_active', 'is_staff')
+    list_filter = ('rol', 'is_active', 'is_staff', 'sedes')
+    filter_horizontal = ('groups', 'user_permissions', 'sedes')
 
     # Campos que aparecen al editar un usuario
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Información personal', {'fields': ('nombre', 'email', 'celular', 'documento')}),
-        ('Rol y permisos', {'fields': ('rol', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Rol y permisos', {'fields': ('rol', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions', 'sedes')}),
         ('Fechas importantes', {'fields': ('last_login', 'date_joined')}),
     )
 
@@ -21,7 +22,7 @@ class RolUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'email', 'nombre', 'celular', 'documento', 'rol', 'is_active', 'is_staff'),
+            'fields': ('username', 'password1', 'password2', 'email', 'nombre', 'celular', 'documento', 'rol', 'is_active', 'is_staff', 'sedes'),
         }),
     )
 
@@ -61,6 +62,7 @@ class MovimientoAdmin(admin.ModelAdmin):
     list_display = ('dispositivo', 'encargado', 'fecha_movimiento', 'ubicacion_origen', 'ubicacion_destino')
     search_fields = ('dispositivo__serial', 'encargado__username', 'ubicacion_origen', 'ubicacion_destino')
     list_filter = ('fecha_movimiento', 'ubicacion_origen', 'ubicacion_destino')
+    date_hierarchy = 'fecha_movimiento'
 
 # Admin para Estadoproveedor
 @admin.register(Estadoproveedor)
@@ -74,3 +76,4 @@ class HistorialAdmin(admin.ModelAdmin):
     list_display = ('dispositivo', 'usuario', 'fecha_modificacion', 'tipo_cambio', 'cambios')
     search_fields = ('dispositivo__serial', 'usuario__username', 'tipo_cambio')
     list_filter = ('fecha_modificacion', 'tipo_cambio')
+    date_hierarchy = 'fecha_modificacion'

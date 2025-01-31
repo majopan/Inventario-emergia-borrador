@@ -1,10 +1,23 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, User
+from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 
+class Sede(models.Model):
+    """
+    Modelo que representa una sede.
+    """
+    nombre = models.CharField(max_length=100)
+    ciudad = models.CharField(max_length=100)
+    direccion = models.TextField()
 
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name = "Sede"
+        verbose_name_plural = "Sedes"
 
 class RolUser(AbstractUser):
     """
@@ -14,16 +27,15 @@ class RolUser(AbstractUser):
         ('admin', 'Administrador'),
         ('coordinador', 'Coordinador'),
     ]
-    # Campo para roles de usuario
     rol = models.CharField(max_length=15, choices=ROLES_CHOICES, default='coordinador')
-
-    # Campos adicionales
     nombre = models.CharField("Nombre completo", max_length=150, blank=True, null=True)
     celular = models.CharField("Celular", max_length=15, blank=True, null=True)
     documento = models.CharField("Documento de identificación", max_length=50, blank=True, null=True)
     email = models.EmailField("Correo electrónico", unique=True)
 
-    # Evitar conflictos con los nombres de relaciones
+    # Relación con sedes
+    sedes = models.ManyToManyField(Sede, blank=True, related_name='usuarios_asignados')
+
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='custom_user_set',
@@ -46,20 +58,6 @@ class RolUser(AbstractUser):
         verbose_name = "Usuario"
         verbose_name_plural = "Usuarios"
         ordering = ['id']
-
-
-class Sede(models.Model):
-    nombre = models.CharField(max_length=100)
-    ciudad = models.CharField(max_length=100)
-    direccion = models.TextField()
-
-    def __str__(self):
-        return self.nombre
-
-    class Meta:
-        verbose_name = "Sede"
-        verbose_name_plural = "Sedes"
-
 
 class Servicios(models.Model):
     nombre = models.CharField(max_length=100)

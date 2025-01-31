@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ReactComponent as Logo } from '../assets/logo.svg';
 import EInventoryLogo from '../assets/E-Inventory.png';
 import { Link, useNavigate } from "react-router-dom";
@@ -9,21 +9,47 @@ const Login = () => {
   const [forgotPassword, setForgotPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [sedeId, setSedeId] = useState('');
+  const [sedes, setSedes] = useState([]);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchSedes = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/sedes/');
+        const data = await response.json();
+        if (response.ok) {
+          setSedes(data.sedes);  // Utiliza la clave 'sedes' del JSON
+        } else {
+          setError('Error al obtener las sedes');
+        }
+      } catch (err) {
+        setError('Error de conexión con el servidor');
+      }
+    };
+
+    fetchSedes();
+  }, []);
 
   const handleForgotPasswordClick = () => setForgotPassword(true);
   const handleBackToLoginClick = () => setForgotPassword(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (!sedeId) {
+      setError('Por favor selecciona una sede.');
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:8000/api/login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, sede_id: sedeId }),
       });
-      
+
       const data = await response.json();
       if (response.ok) {
         alert(`Bienvenido ${data.username}`);
@@ -57,6 +83,14 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <select value={sedeId} onChange={(e) => setSedeId(e.target.value)}>
+                <option value="">Seleccionar sede</option>
+                {sedes.map(sede => (
+                  <option key={sede.id} value={sede.id}>
+                    {sede.nombre} - {sede.ciudad}
+                  </option>
+                ))}
+              </select>
               <Link to="#" onClick={handleForgotPasswordClick}>¿Olvidaste tu contraseña?</Link>
               <button type="submit">Entrar</button>
             </form>
