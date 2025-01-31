@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 @api_view(['POST'])
 def register_user(request):
     """
-    Registra un nuevo usuario con múltiples sedes asignadas.
+    Registra un nuevo usuario. Los administradores tienen acceso a todas las sedes por defecto.
     """
     data = request.data
     username = data.get('username', '').strip()
@@ -49,12 +49,15 @@ def register_user(request):
             password=make_password(password),
         )
 
-        # Asignar sedes
-        if sede_ids:
+        # Asignar todas las sedes si el usuario es administrador
+        if rol == 'admin':
+            sedes = Sede.objects.all()
+        else:
             sedes = Sede.objects.filter(id__in=sede_ids)
-            user.sedes.set(sedes)
 
+        user.sedes.set(sedes)
         user.save()
+
         return Response({"message": "Usuario registrado exitosamente."}, status=status.HTTP_201_CREATED)
 
     except Exception as e:
@@ -62,14 +65,14 @@ def register_user(request):
         return Response({"error": "Ocurrió un error al registrar el usuario."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
 @api_view(['POST'])
 def login_view(request):
     """
-    Autentica a un usuario con su nombre de usuario, contraseña y sede.
+    Autentica a un usuario con su nombre de usuario y contraseña. Devuelve las sedes permitidas según su rol.
     """
     username = request.data.get('username', '').strip()
     password = request.data.get('password', '').strip()
-    sede_id = request.data.get('sede_id')
 
     if not username or not password:
         return Response({"error": "El nombre de usuario y la contraseña son obligatorios."}, status=400)
@@ -77,19 +80,24 @@ def login_view(request):
     user = authenticate(username=username, password=password)
 
     if user is not None:
-        # Validar acceso a la sede si el usuario es coordinador
-        if user.rol == 'coordinador':
-            if not sede_id or not user.sedes.filter(id=sede_id).exists():
-                return Response({"error": "Acceso denegado a la sede seleccionada."}, status=403)
+        # Si es administrador, devolver todas las sedes
+        if user.rol == 'admin':
+            sedes_permitidas = Sede.objects.all()
+        # Si es coordinador, devolver solo las sedes asignadas
+        elif user.rol == 'coordinador':
+            sedes_permitidas = user.sedes.all()
+        else:
+            return Response({"error": "Rol no autorizado."}, status=403)
 
         return Response({
             "message": "Inicio de sesión exitoso",
             "username": user.username,
             "rol": user.rol,
-            "sedes": list(user.sedes.values("id", "nombre"))
+            "sedes": list(sedes_permitidas.values("id", "nombre", "ciudad", "direccion"))
         })
     else:
         return Response({"error": "Credenciales inválidas."}, status=401)
+
 
 
 @api_view(['GET'])
