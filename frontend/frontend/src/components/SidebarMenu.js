@@ -19,23 +19,23 @@ const SidebarMenu = () => {
         <FaHome size={20} />
         <span>Inicio</span>
       </Link>
-      <Link to="/inventory" className={isActive('/inventory')}>
+      <Link to="/inventario" className={isActive('/inventario')}>
         <MdInventory size={20} />
         <span>Inventario</span>
       </Link>
-      <Link to="/planos" className={isActive('/plans')}>
+      <Link to="/planos" className={isActive('/planos')}>
         <BsDiagram3 size={20} />
         <span>Planos</span>
       </Link>
-      <Link to="/records" className={isActive('/records')}>
+      <Link to="/registro" className={isActive('/registro')}>
         <AiOutlineFileText size={20} />
         <span>Registros</span>
       </Link>
-      <Link to="/history" className={isActive('/history')}>
+      <Link to="/historial" className={isActive('/historial')}>
         <MdHistory size={20} />
         <span>Historial</span>
       </Link>
-      <Link to="/devices" className={isActive('/devices')}>
+      <Link to="/dispositivos" className={isActive('/dispositivos')}>
         <IoIosDesktop size={20} />
         <span>Dispositivos</span>
       </Link>

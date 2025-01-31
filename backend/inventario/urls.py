@@ -24,4 +24,6 @@ urlpatterns = [
     path('api/reset-password-request/', views.reset_password_request, name='reset_password_request'),
     path('api/reset-password/', views.reset_password, name='reset_password'),  # Asegúrate de tener esta ruta
     path('api/sedes/', views.get_sedes_view, name='get_sedes_view'),
+    path('api/usuarios/', views.get_users_view, name='get_users_view'),
+
 ]

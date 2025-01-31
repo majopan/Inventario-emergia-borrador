@@ -41,7 +41,6 @@
 }
 
 .dashboard-image-container {
-  flex: 1; /* Asegura que la imagen ocupe el espacio necesario */
   margin-left: 0; /* Elimina el margen izquierdo */
 }
 

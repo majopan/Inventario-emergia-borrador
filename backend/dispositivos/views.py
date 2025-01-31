@@ -181,3 +181,30 @@ def reset_password(request):
         return Response({"error": "El correo no está registrado."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": f"Error al cambiar la contraseña: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
+from .models import RolUser
+
+@api_view(['GET'])
+def get_users_view(request):
+    """
+    Devuelve una lista de todos los usuarios registrados con sus detalles.
+    """
+    try:
+        users = RolUser.objects.all()
+        users_data = [
+            {
+                "id": user.id,
+                "nombre": user.nombre,
+                "rol": user.rol,
+                "sede": user.sedes.first().nombre if user.sedes.exists() else "Sin sede",
+                "activo": user.is_active,
+            }
+            for user in users
+        ]
+        return Response({"usuarios": users_data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

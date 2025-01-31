@@ -34,7 +34,7 @@ function App() {
           }
         />
         <Route
-          path="/inventory"
+          path="/inventario"
           element={
             <div style={{ display: "flex" }}>
               <SidebarMenu />
@@ -61,7 +61,7 @@ function App() {
           }
         />
         <Route
-          path="/records"
+          path="/registro"
           element={
             <div style={{ display: "flex" }}>
               <SidebarMenu />
@@ -70,7 +70,7 @@ function App() {
           }
         />
         <Route
-          path="/history"
+          path="/historial"
           element={
             <div style={{ display: "flex" }}>
               <SidebarMenu />
@@ -79,7 +79,7 @@ function App() {
           }
         />
         <Route
-          path="/devices"
+          path="/dispositivos"
           element={
             <div style={{ display: "flex" }}>
               <SidebarMenu />
