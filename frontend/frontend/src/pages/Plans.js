@@ -70,6 +70,12 @@ const Plans = () => {
                   <div className="cell red-mark">E006</div>
                 </div>
                 <div className="row">
+                  <div className="cell"> </div>
+                  <div className="cell"> </div>
+                  <div className="cell"> </div>
+                  <div className="cell"> </div>
+                </div>
+                <div className="row">
                   <div className="cell">E007</div>
                   <div className="cell red-dot">E008</div>
                   <div className="cell orange">E009</div>
