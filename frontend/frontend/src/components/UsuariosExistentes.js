@@ -5,42 +5,56 @@ import '../styles/Registro.css';
 
 const UsuariosExistentes = () => {
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null); // Usuario seleccionado
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // Función para obtener los usuarios desde el backend
   const fetchUsers = async () => {
     try {
       const response = await axios.get('http://127.0.0.1:8000/api/usuarios/');
-      setUsers(Array.isArray(response.data) ? response.data : []);
+      console.log('Respuesta de la API:', response.data);
+
+      if (response.data && Array.isArray(response.data)) {
+        setUsers(response.data);
+      } else {
+        console.error('La respuesta de la API no tiene la estructura esperada:', response.data);
+        setUsers([]);
+      }
     } catch (error) {
-      console.error('Error al obtener usuarios:', error);
+      console.error('Error fetching users:', error);
       setUsers([]);
     }
   };
 
-  // Función para obtener los detalles de un usuario
-  const fetchUserDetails = async (userId) => {
-    try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/usuarios/${userId}/`);
-      setSelectedUser(response.data);
-      setShowDetailModal(true);
-    } catch (error) {
-      console.error('Error al obtener detalles del usuario:', error);
-    }
-  };
-
+  // Llamar a fetchUsers cuando el componente se monta
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  const toggleModal = () => setShowModal(!showModal);
+
+  // Función para manejar el clic en un usuario
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    toggleModal();
+  };
+
+  // Función para eliminar un usuario
+  const deleteUser = (id) => {
+    const newUsers = users.filter((user) => user.id !== id);
+    setUsers(newUsers);
+  };
+
   return (
     <div className="card">
       <h2>Usuarios existentes</h2>
+      <button className="add-user-btn" onClick={toggleModal}>
+        <FaUserPlus />
+      </button>
       <div className="users-list">
-        {users.length > 0 ? (
+        {Array.isArray(users) && users.length > 0 ? (
           users.map((user) => (
-            <div key={user.id} className="user-item" onClick={() => fetchUserDetails(user.id)}>
+            <div key={user.id} className="user-item" onClick={() => handleUserClick(user)}>
               <FaUser className="user-icon" />
               <div className="user-info">
                 <strong>{user.nombre}</strong>
@@ -48,8 +62,19 @@ const UsuariosExistentes = () => {
                   Acceso a{' '}
                   {user.rol === 'admin'
                     ? 'toda la información de las sedes'
-                    : 'información limitada'}
+                    : `la sede de ${user.sede}`}
                 </p>
+              </div>
+              <div className="user-actions">
+                <span className={`status ${user.activo ? 'activo' : 'inactivo'}`}>
+                  {user.activo ? 'Activo' : 'Inactivo'}
+                </span>
+                <button className="edit-btn">
+                  <FaEdit />
+                </button>
+                <button className="delete-btn" onClick={(e) => { e.stopPropagation(); deleteUser(user.id); }}>
+                  <FaTrashAlt />
+                </button>
               </div>
             </div>
           ))
@@ -58,25 +83,26 @@ const UsuariosExistentes = () => {
         )}
       </div>
 
-      {/* Modal para mostrar los detalles del usuario */}
-      {showDetailModal && selectedUser && (
+      {/* Modal para mostrar detalles del usuario */}
+      {showModal && selectedUser && (
         <div className="modal">
           <div className="modal-content">
-            <h3>Detalles del usuario</h3>
-            <p><strong>Nombre completo:</strong> {selectedUser.nombre}</p>
-            <p><strong>Email:</strong> {selectedUser.email}</p>
-            <p><strong>Documento:</strong> {selectedUser.documento}</p>
-            <p><strong>Celular:</strong> {selectedUser.celular}</p>
-            <p><strong>Rol:</strong> {selectedUser.rol}</p>
-            <h4>Sedes asignadas:</h4>
-            <ul>
-              {selectedUser.sedes.map((sede) => (
-                <li key={sede.id}>
-                  {sede.nombre} - {sede.ciudad}
-                </li>
-              ))}
-            </ul>
-            <button className="close-modal-btn" onClick={() => setShowDetailModal(false)}>
+            <h3>Detalles del Usuario</h3>
+            <div>
+              <p><strong>Nombre:</strong> {selectedUser.nombre}</p>
+              <p><strong>Usuario:</strong> {selectedUser.username}</p>
+              <p><strong>Email:</strong> {selectedUser.email}</p>
+              <p><strong>Rol:</strong> {selectedUser.rol}</p>
+              <p><strong>Celular:</strong> {selectedUser.celular}</p>
+              <p><strong>Documento:</strong> {selectedUser.documento}</p>
+              <p><strong>Sedes:</strong></p>
+              <ul>
+                {selectedUser.sedes && selectedUser.sedes.map((sede) => (
+                  <li key={sede.id}>{sede.nombre} - {sede.ciudad}</li>
+                ))}
+              </ul>
+            </div>
+            <button className="close-modal-btn" onClick={toggleModal}>
               Cerrar
             </button>
           </div>

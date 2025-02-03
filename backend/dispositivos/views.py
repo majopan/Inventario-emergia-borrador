@@ -40,31 +40,48 @@ def login_view(request):
     else:
         return Response({"error": "Credenciales inválidas."}, status=401)
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.hashers import make_password
+from .models import RolUser, Sede
+import logging
+
+logger = logging.getLogger(__name__)
+
 @api_view(['POST'])
-def register_user(request):
+def register_user_view(request):
     """
-    Registra un nuevo usuario.
+    Registra un nuevo usuario desde el formulario del frontend.
     """
     data = request.data
+
+    # Obtener y validar los campos del formulario
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
+    confirm_password = data.get('confirmPassword', '').strip()
     email = data.get('email', '').strip().lower()
-    rol = data.get('rol', 'coordinador')
     nombre = data.get('nombre', '').strip()
     celular = data.get('celular', '').strip()
     documento = data.get('documento', '').strip()
-    sede_ids = data.get('sedes', [])
+    rol = data.get('rol', 'coordinador')
+    sedes_ids = data.get('sedes', [])
 
+    # Validaciones básicas
     if not username or not password or not email:
-        return Response({"error": "Nombre de usuario, contraseña y correo son obligatorios."}, status=400)
+        return Response({"error": "Nombre de usuario, contraseña y correo son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if password != confirm_password:
+        return Response({"error": "Las contraseñas no coinciden."}, status=status.HTTP_400_BAD_REQUEST)
 
     if RolUser.objects.filter(username=username).exists():
-        return Response({"error": "El nombre de usuario ya está registrado."}, status=400)
+        return Response({"error": "El nombre de usuario ya está registrado."}, status=status.HTTP_400_BAD_REQUEST)
 
     if RolUser.objects.filter(email=email).exists():
-        return Response({"error": "El correo ya está registrado."}, status=400)
+        return Response({"error": "El correo ya está registrado."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
+        # Crear el usuario
         user = RolUser.objects.create(
             username=username,
             email=email,
@@ -73,13 +90,11 @@ def register_user(request):
             celular=celular,
             documento=documento,
             password=make_password(password),
+            is_active=True
         )
 
-        if rol == 'admin':
-            sedes = Sede.objects.all()
-        else:
-            sedes = Sede.objects.filter(id__in=sede_ids)
-
+        # Asignar sedes al usuario
+        sedes = Sede.objects.filter(id__in=sedes_ids)
         user.sedes.set(sedes)
         user.save()
 
@@ -88,6 +103,25 @@ def register_user(request):
     except Exception as e:
         logger.error(f"Error al registrar el usuario: {str(e)}")
         return Response({"error": "Ocurrió un error al registrar el usuario."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import RolUser
+from .serializers import RolUserSerializer
+
+@api_view(['POST'])
+def register_user_view(request):
+    """
+    Vista para registrar un nuevo usuario desde el formulario.
+    """
+    serializer = RolUserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 @api_view(['POST'])
 def reset_password_request(request):

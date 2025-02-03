@@ -21,7 +21,7 @@ from dispositivos import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/login/', views.login_view, name='login'),
-    path('api/register/', views.register_user, name='register_user'),
+    path('api/register/', views.register_user_view, name='register_user'),
     path('api/reset-password-request/', views.reset_password_request, name='reset_password_request'),
     path('api/reset-password/', views.reset_password, name='reset_password'),
     path('api/sedes/', views.get_sedes_view, name='get_sedes_view'),
