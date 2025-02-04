@@ -1,15 +1,20 @@
-from django.contrib.auth import authenticate
-from django.contrib.auth.hashers import make_password
-from django.core.mail import send_mail
-from django.conf import settings
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework import status
+# Importaciones
+from django.contrib.auth import authenticate # type: ignore
+from django.contrib.auth.hashers import make_password # type: ignore
+from django.core.mail import send_mail # type: ignore
+from django.conf import settings # type: ignore
+from django.shortcuts import get_object_or_404 # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework.decorators import api_view # type: ignore
+from rest_framework import status # type: ignore
 from .models import RolUser, Sede
+from .serializers import RolUserSerializer
 import logging
 
+# Configuración del logger
 logger = logging.getLogger(__name__)
 
+# Vistas de autenticación
 @api_view(['POST'])
 def login_view(request):
     """
@@ -19,7 +24,7 @@ def login_view(request):
     password = request.data.get('password', '').strip()
 
     if not username or not password:
-        return Response({"error": "El nombre de usuario y la contraseña son obligatorios."}, status=400)
+        return Response({"error": "El nombre de usuario y la contraseña son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
 
     user = authenticate(username=username, password=password)
 
@@ -29,7 +34,7 @@ def login_view(request):
         elif user.rol == 'coordinador':
             sedes_permitidas = user.sedes.all()
         else:
-            return Response({"error": "Rol no autorizado."}, status=403)
+            return Response({"error": "Rol no autorizado."}, status=status.HTTP_403_FORBIDDEN)
 
         return Response({
             "message": "Inicio de sesión exitoso",
@@ -38,16 +43,7 @@ def login_view(request):
             "sedes": list(sedes_permitidas.values("id", "nombre", "ciudad", "direccion"))
         })
     else:
-        return Response({"error": "Credenciales inválidas."}, status=401)
-
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth.hashers import make_password
-from .models import RolUser, Sede
-import logging
-
-logger = logging.getLogger(__name__)
+        return Response({"error": "Credenciales inválidas."}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['POST'])
 def register_user_view(request):
@@ -104,25 +100,6 @@ def register_user_view(request):
         logger.error(f"Error al registrar el usuario: {str(e)}")
         return Response({"error": "Ocurrió un error al registrar el usuario."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from .models import RolUser
-from .serializers import RolUserSerializer
-
-@api_view(['POST'])
-def register_user_view(request):
-    """
-    Vista para registrar un nuevo usuario desde el formulario.
-    """
-    serializer = RolUserSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 @api_view(['POST'])
 def reset_password_request(request):
     """
@@ -176,6 +153,7 @@ def reset_password(request):
     except Exception as e:
         return Response({"error": f"Error al cambiar la contraseña: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Vistas de consulta
 @api_view(['GET'])
 def get_sedes_view(request):
     """
@@ -188,23 +166,14 @@ def get_sedes_view(request):
         logger.error(f"Error al obtener las sedes: {str(e)}")
         return Response({"error": "Ocurrió un error al obtener las sedes."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from .models import RolUser
-from .serializers import RolUserSerializer
-
 @api_view(['GET'])
 def get_users_view(request):
+    """
+    Devuelve una lista de todos los usuarios.
+    """
     users = RolUser.objects.all()
     serializer = RolUserSerializer(users, many=True)
     return Response(serializer.data)
-
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from .models import RolUser
-from .serializers import RolUserSerializer
 
 @api_view(['GET'])
 def get_user_detail_view(request, user_id):
@@ -214,4 +183,3 @@ def get_user_detail_view(request, user_id):
     user = get_object_or_404(RolUser, id=user_id)
     serializer = RolUserSerializer(user)
     return Response(serializer.data)
-
