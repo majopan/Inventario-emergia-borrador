@@ -1,164 +1,52 @@
-        .records-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            width: calc(100vw - 100px);
-            margin-left: 100px;
-            background-color: #2b2f42;
-            padding: 20px;
-            color: #fff;
-            overflow-y: auto;
-        }
-        
-        .records-image-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .records-image {
-            max-width: 100%;
-            height: auto;
-        }
-        
-    /* Estilos específicos para la tarjeta de usuarios */
-    .card-usuarios {
-        background-color: #3a3a4a;
-        border-radius: 10px;
-        padding: 20px;
-        width: 100%; /* Asegura que ocupe todo el ancho */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        position: relative;
-    }
-    
-    .card-usuarios h2 {
-        margin-bottom: 20px;
-        color: #ffcc00;
-    }
-    
-    .card-usuarios .add-user-btn {
-        background-color: #ffcc00;
-        color: #3a3a4a;
-        border: none;
-        padding: 10px;
-        border-radius: 50%;
-        cursor: pointer;
-        position: absolute;
-        top: 20px;
-        right: 20px;
-    }
-    
-    .card-usuarios .usuarios-list {
-        margin-top: 20px;
-    }
-    
-    .card-usuarios .usuario-item {
-        display: flex;
-        align-items: center;
-        background-color: #44445a;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-    }
-    
-    .card-usuarios .user-icon {
-        font-size: 24px;
-        color: #ffcc00;
-        margin-right: 15px;
-    }
-    
-    .card-usuarios .usuario-info {
-        flex: 1;
-    }
-    
-    .card-usuarios .usuario-actions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .card-usuarios .status {
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-weight: 600;
-    }
-    
-    .card-usuarios .status.activo {
-        background-color: #4caf50;
-        color: #fff;
-    }
-    
-    .card-usuarios .status.inactivo {
-        background-color: #f44336;
-        color: #fff;
-    }
-    
-    .card-usuarios .edit-btn, .card-usuarios .delete-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: #ffcc00;
-        font-size: 18px;
-    }
-    
-    .card-usuarios .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .card-usuarios .modal-content {
-        background: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        width: 90%;
-        max-width: 400px;
-        color: #000;
-    }
-    
-    .card-usuarios .close-modal-btn {
-        background-color: #f44336;
-        color: #fff;
-        padding: 10px;
-        border: none;
-        border-radius: 5px;
-        margin-top: 20px;
-        cursor: pointer;
-    }
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 999;
-      }
-      
-      .modal-content {
-        background: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        width: 90%;
-        max-width: 500px;
-        color: #000;
-        position: relative;
-      }
-      
-      .close-modal-btn {
-        background-color: #f44336;
-        color: #fff;
-        padding: 10px;
-        border: none;
-        border-radius: 5px;
-        margin-top: 20px;
-        cursor: pointer;
-      }
+.registro-container {
+    display: flex;
+    height: 100vh; /* Ocupa el 100% de la altura de la ventana */
+    width: calc(100vw - 100px); /* Resta el ancho del menú lateral */
+    margin-left: 100px; /* Añade un margen izquierdo igual al ancho del menú */
+    background-color: #2b2f42;
+    flex-direction: column; /* Mantener los elementos apilados */
+    overflow: hidden; /* Evita el desbordamiento */
+    overflow-y: auto; /* Permite el desplazamiento vertical si el contenido es demasiado largo */
+    padding: 20px; /* Añade un padding general para separar el contenido de los bordes */
+  }
+  
+  .registro-image-container {
+    margin-left: 0; /* Elimina el margen izquierdo */
+  }
+  
+  .registro-content {
+    flex: 1; /* Esto hace que el contenido ocupe el resto del espacio */
+    position: relative; /* Esto ayudará a prevenir la sobreposición */
+    margin-left: -30px;
+  }
+  
+  .registro-image {
+    width: 40%; /* La imagen ocupará el 40% del ancho disponible */
+    max-width: 80%; /* La imagen no se desbordará */
+    max-height: 80%; /* La imagen no se desbordará */
+    object-fit: cover; /* Mantiene la proporción de la imagen */
+  }
+  
+  .records-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: calc(100vw - 100px);
+    margin-left: 50px; /* Ajustado el margen para moverlo hacia la izquierda */
+    background-color: #2b2f42;
+    padding: 20px;
+    color: #fff;
+    overflow-y: auto;
+    position: relative; /* Asegura que no haya solapamientos */
+  }
+  
+  .records-image-container {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .records-image {
+    max-width: 100%;
+    height: auto;
+  }
+  
