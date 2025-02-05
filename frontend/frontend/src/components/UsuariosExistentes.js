@@ -155,101 +155,145 @@ const UsuariosExistentes = () => {
           )}
         </div>
 
-        {/* Modal for viewing and editing user details */}
-        {showDetailModal && selectedUser && (
-          <div className="modal">
-            <div className="modal-content">
-              <h2>Detalles del usuario</h2>
-              <input
-                type="text"
-                value={selectedUser.nombre || ""}
-                onChange={(e) => setSelectedUser({ ...selectedUser, nombre: e.target.value })}
-                placeholder="Nombre"
-              />
-              <input
-                type="text"
-                value={selectedUser.username || ""}
-                onChange={(e) => setSelectedUser({ ...selectedUser, username: e.target.value })}
-                placeholder="Nombre de usuario"
-              />
-              <input
-                type="email"
-                value={selectedUser.email || ""}
-                onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
-                placeholder="Correo electrónico"
-              />
-              <input
-                type="text"
-                value={selectedUser.documento || ""}
-                onChange={(e) => setSelectedUser({ ...selectedUser, documento: e.target.value })}
-                placeholder="Documento de identidad"
-              />
-              <button onClick={() => editUser(selectedUser.id, selectedUser)}>Guardar cambios</button>
-              <button className="close-modal-btn" onClick={() => setShowDetailModal(false)}>
-                Cerrar
-              </button>
-            </div>
-          </div>
-        )}
+{/* Modal for viewing and editing user details */}
+{showDetailModal && selectedUser && (
+  <div className="modal-overlay">
+    <div className="modal-container">
+      <button className="close-button" onClick={() => setShowDetailModal(false)}>
+        &times;
+      </button>
+      <div className="modal-content">
+        <h1>Detalles del usuario</h1>
+        <div className="input-group">
+          <label>Nombre</label>
+          <input
+            type="text"
+            value={selectedUser.nombre || ""}
+            onChange={(e) => setSelectedUser({ ...selectedUser, nombre: e.target.value })}
+            placeholder="Nombre"
+          />
+        </div>
+        <div className="input-group">
+          <label>Nombre de usuario</label>
+          <input
+            type="text"
+            value={selectedUser.username || ""}
+            onChange={(e) => setSelectedUser({ ...selectedUser, username: e.target.value })}
+            placeholder="Nombre de usuario"
+          />
+        </div>
+        <div className="input-group">
+          <label>Correo electrónico</label>
+          <input
+            type="email"
+            value={selectedUser.email || ""}
+            onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
+            placeholder="Correo electrónico"
+          />
+        </div>
+        <div className="input-group">
+          <label>Documento de identidad</label>
+          <input
+            type="text"
+            value={selectedUser.documento || ""}
+            onChange={(e) => setSelectedUser({ ...selectedUser, documento: e.target.value })}
+            placeholder="Documento de identidad"
+          />
+        </div>
+        <button className="create-button" onClick={() => editUser(selectedUser.id, selectedUser)}>
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
-        {/* Modal for adding new user */}
-        {showForm && (
-          <div className="modal">
-            <div className="modal-content">
-              <h2>Agregar Usuario</h2>
-              <input
-                type="text"
-                placeholder="Nombre de usuario"
-                value={newUser.username}
-                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-              />
-              <input
-                type="text"
-                placeholder="Nombre completo"
-                value={newUser.nombre}
-                onChange={(e) => setNewUser({ ...newUser, nombre: e.target.value })}
-              />
-              <input
-                type="email"
-                placeholder="Correo electrónico"
-                value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-              />
-              <input
-                type="text"
-                placeholder="Documento de identidad"
-                value={newUser.documento}
-                onChange={(e) => setNewUser({ ...newUser, documento: e.target.value })}
-              />
-              <input
-                type="text"
-                placeholder="Número de celular"
-                value={newUser.celular}
-                onChange={(e) => setNewUser({ ...newUser, celular: e.target.value })}
-              />
-              <input
-                type="password"
-                placeholder="Contraseña"
-                value={newUser.password}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-              />
-              <input
-                type="password"
-                placeholder="Confirmar contraseña"
-                value={newUser.confirm_password}
-                onChange={(e) => setNewUser({ ...newUser, confirm_password: e.target.value })}
-              />
-              <select value={newUser.rol} onChange={(e) => setNewUser({ ...newUser, rol: e.target.value })}>
-                <option value="usuario">Usuario</option>
-                <option value="admin">Administrador</option>
-              </select>
-              <button onClick={addUser}>Agregar</button>
-              <button className="close-modal-btn" onClick={() => setShowForm(false)}>
-                Cerrar
-              </button>
-            </div>
-          </div>
-        )}
+{/* Modal for adding new user */}
+{showForm && (
+  <div className="modal-overlay">
+    <div className="modal-container">
+      <button className="close-button" onClick={() => setShowForm(false)}>
+        &times;
+      </button>
+      <div className="modal-content">
+        <h1>Agregar Usuario</h1>
+        <div className="input-group">
+          <label>Nombre de usuario</label>
+          <input
+            type="text"
+            placeholder="Nombre de usuario"
+            value={newUser.username}
+            onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+          />
+        </div>
+        <div className="input-group">
+          <label>Nombre completo</label>
+          <input
+            type="text"
+            placeholder="Nombre completo"
+            value={newUser.nombre}
+            onChange={(e) => setNewUser({ ...newUser, nombre: e.target.value })}
+          />
+        </div>
+        <div className="input-group">
+          <label>Correo electrónico</label>
+          <input
+            type="email"
+            placeholder="Correo electrónico"
+            value={newUser.email}
+            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+          />
+        </div>
+        <div className="input-group">
+          <label>Documento de identidad</label>
+          <input
+            type="text"
+            placeholder="Documento de identidad"
+            value={newUser.documento}
+            onChange={(e) => setNewUser({ ...newUser, documento: e.target.value })}
+          />
+        </div>
+        <div className="input-group">
+          <label>Número de celular</label>
+          <input
+            type="text"
+            placeholder="Número de celular"
+            value={newUser.celular}
+            onChange={(e) => setNewUser({ ...newUser, celular: e.target.value })}
+          />
+        </div>
+        <div className="input-group">
+          <label>Contraseña</label>
+          <input
+            type="password"
+            placeholder="Contraseña"
+            value={newUser.password}
+            onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+          />
+        </div>
+        <div className="input-group">
+          <label>Confirmar contraseña</label>
+          <input
+            type="password"
+            placeholder="Confirmar contraseña"
+            value={newUser.confirm_password}
+            onChange={(e) => setNewUser({ ...newUser, confirm_password: e.target.value })}
+          />
+        </div>
+        <div className="input-group select-wrapper">
+          <label>Rol</label>
+          <select value={newUser.rol} onChange={(e) => setNewUser({ ...newUser, rol: e.target.value })}>
+            <option value="usuario">Usuario</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        <button className="create-button" onClick={addUser}>
+          Agregar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       </div>
     </div>
   );
