@@ -188,6 +188,8 @@ input:checked + .slider:before {
   transform: translateX(20px);
 }
 
+
+/* Modal styles */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -303,3 +305,9 @@ input:checked + .slider:before {
     transform: translateY(0);
   }
   
+
+  .input-group select option {
+    background-color: #5046e4;
+    color: white;
+    padding: 8px;
+  }
