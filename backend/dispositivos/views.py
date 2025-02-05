@@ -1,40 +1,59 @@
-# Importaciones
-from django.contrib.auth import authenticate # type: ignore
-from django.contrib.auth.hashers import make_password # type: ignore
-from django.core.mail import send_mail # type: ignore
-from django.conf import settings # type: ignore
-from django.shortcuts import get_object_or_404 # type: ignore
-from rest_framework.response import Response # type: ignore
-from rest_framework.decorators import api_view # type: ignore
-from rest_framework import status # type: ignore
-from .models import RolUser, Sede
-from .serializers import RolUserSerializer
+
+from django.contrib.auth.hashers import make_password
+from django.core.mail import send_mail
+from django.conf import settings
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from .models import RolUser, Sede , Dispositivo
 import logging
-
-# Configuración del logger
+from rest_framework import viewsets
 logger = logging.getLogger(__name__)
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import LoginSerializer
+from django.contrib.auth.models import User
+from .serializers import RolUserSerializer
 
-# Vistas de autenticación
-@api_view(['POST'])
+
+
+@api_view(['GET' ])
+@permission_classes([IsAuthenticated])  # Solo los usuarios autenticados pueden acceder
+def get_users_view(request):
+    """
+    Obtiene la lista de usuarios.
+    """
+    # Obtén los usuarios de la base de datos (en tu caso RolUser)
+    users = RolUser.objects.all()
+    
+    # Serializa la lista de usuarios
+    serializer = RolUserSerializer(users, many=True)
+    
+    # Devuelve la lista de usuarios serializada
+    return Response(serializer.data)
+
+class RolUserViewSet(viewsets.ModelViewSet):
+    queryset = RolUser.objects.all()
+    serializer_class = RolUserSerializer
+
+@api_view(['GET' , 'POST'])
 def login_view(request):
     """
     Autentica a un usuario con su nombre de usuario y contraseña.
     """
-    username = request.data.get('username', '').strip()
-    password = request.data.get('password', '').strip()
+    serializer = LoginSerializer(data=request.data)
 
-    if not username or not password:
-        return Response({"error": "El nombre de usuario y la contraseña son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
-
-    user = authenticate(username=username, password=password)
-
-    if user is not None:
+    if serializer.is_valid():
+        user = serializer.validated_data['user']
+        
+        # Definir las sedes disponibles para el usuario
         if user.rol == 'admin':
             sedes_permitidas = Sede.objects.all()
         elif user.rol == 'coordinador':
             sedes_permitidas = user.sedes.all()
         else:
-            return Response({"error": "Rol no autorizado."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "Rol no autorizado."}, status=403)
 
         return Response({
             "message": "Inicio de sesión exitoso",
@@ -42,10 +61,78 @@ def login_view(request):
             "rol": user.rol,
             "sedes": list(sedes_permitidas.values("id", "nombre", "ciudad", "direccion"))
         })
-    else:
-        return Response({"error": "Credenciales inválidas."}, status=status.HTTP_401_UNAUTHORIZED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.hashers import make_password
+from .models import RolUser, Sede
+import logging
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from .models import RolUser
+from .serializers import RolUserSerializer
+from rest_framework.permissions import AllowAny
+
+logger = logging.getLogger(__name__)
+
+
+@api_view(['GET'])
+def get_users_view(request):
+    users = RolUser.objects.all()
+    serializer = RolUserSerializer(users, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_detail_view(request, user_id):
+    try:
+        user = RolUser.objects.get(id=user_id)
+    except RolUser.DoesNotExist:
+        return Response({"error": "Usuario no encontrado."}, status=404)
+
+    serializer = RolUserSerializer(user)
+    return Response(serializer.data, status=200)
+
+
+@api_view(['PUT'])
+@permission_classes([AllowAny])
+def deactivate_user_view(request, user_id):
+    """
+    Desactiva un usuario cambiando el campo 'is_active' a False.
+    """
+    try:
+        user = RolUser.objects.get(id=user_id)
+    except RolUser.DoesNotExist:
+        return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Desactivar usuario
+    user.is_active = False
+    user.save()
+
+    return Response({"message": "Usuario desactivado exitosamente."}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_user_detail_view(request, user_id):
+    """
+    Devuelve los detalles de un usuario específico.
+    """
+    try:
+        # Obtener el usuario por ID
+        user = RolUser.objects.get(id=user_id)
+    except RolUser.DoesNotExist:
+        return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Serializar y devolver los datos del usuario
+    serializer = RolUserSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET' , 'POST'])
+@permission_classes([AllowAny])
 def register_user_view(request):
     """
     Registra un nuevo usuario desde el formulario del frontend.
@@ -55,7 +142,7 @@ def register_user_view(request):
     # Obtener y validar los campos del formulario
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
-    confirm_password = data.get('confirmPassword', '').strip()
+    confirm_password = data.get('confirm_password', '').strip()
     email = data.get('email', '').strip().lower()
     nombre = data.get('nombre', '').strip()
     celular = data.get('celular', '').strip()
@@ -64,17 +151,12 @@ def register_user_view(request):
     sedes_ids = data.get('sedes', [])
 
     # Validaciones básicas
-    if not username or not password or not email:
-        return Response({"error": "Nombre de usuario, contraseña y correo son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+  
 
     if password != confirm_password:
         return Response({"error": "Las contraseñas no coinciden."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if RolUser.objects.filter(username=username).exists():
-        return Response({"error": "El nombre de usuario ya está registrado."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if RolUser.objects.filter(email=email).exists():
-        return Response({"error": "El correo ya está registrado."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         # Crear el usuario
@@ -100,7 +182,16 @@ def register_user_view(request):
         logger.error(f"Error al registrar el usuario: {str(e)}")
         return Response({"error": "Ocurrió un error al registrar el usuario."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import RolUser
+from .serializers import RolUserSerializer , DispositivoSerializer
+
+
+
+
+@api_view(['GET' , 'POST'])
 def reset_password_request(request):
     """
     Solicita el restablecimiento de contraseña.
@@ -129,7 +220,7 @@ def reset_password_request(request):
         logger.error(f"Error al enviar el correo: {str(e)}")
         return Response({"error": "Ocurrió un error al procesar tu solicitud. Por favor, inténtalo de nuevo más tarde."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
+@api_view(['GET' , 'POST'])
 def reset_password(request):
     """
     Restablece la contraseña del usuario.
@@ -153,8 +244,7 @@ def reset_password(request):
     except Exception as e:
         return Response({"error": f"Error al cambiar la contraseña: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# Vistas de consulta
-@api_view(['GET'])
+@api_view(['GET' , 'POST'])
 def get_sedes_view(request):
     """
     Devuelve una lista de sedes disponibles.
@@ -166,20 +256,74 @@ def get_sedes_view(request):
         logger.error(f"Error al obtener las sedes: {str(e)}")
         return Response({"error": "Ocurrió un error al obtener las sedes."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['GET'])
-def get_users_view(request):
-    """
-    Devuelve una lista de todos los usuarios.
-    """
-    users = RolUser.objects.all()
-    serializer = RolUserSerializer(users, many=True)
-    return Response(serializer.data)
 
-@api_view(['GET'])
-def get_user_detail_view(request, user_id):
+
+@api_view(['PUT'])
+@permission_classes([AllowAny])
+def edit_user_view(request, user_id):
+    try:
+        user = RolUser.objects.get(id=user_id)
+    except RolUser.DoesNotExist:
+        return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Serializar y actualizar datos
+    serializer = RolUserSerializer(user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Usuario editado exitosamente."}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def dispositivo_view(request):
     """
-    Vista para obtener los detalles de un usuario específico.
+    Maneja la creación y listado de dispositivos.
     """
-    user = get_object_or_404(RolUser, id=user_id)
-    serializer = RolUserSerializer(user)
-    return Response(serializer.data)
+
+    if request.method == 'GET':
+        # Obtener todos los dispositivos
+        dispositivos = Dispositivo.objects.all()
+        serializer = DispositivoSerializer(dispositivos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'POST':
+        # Validar y crear un nuevo dispositivo
+        data = request.data
+
+        # Obtener los campos del formulario
+        tipo = data.get('tipo', '').strip()
+        marca = data.get('marca', '').strip()
+        modelo = data.get('modelo', '').strip()
+        serial = data.get('serial', '').strip()
+        estado = data.get('estado', '').strip()
+        capacidad_memoria_ram = data.get('capacidad_memoria_ram', '').strip()
+        capacidad_disco_duro = data.get('capacidad_disco_duro', '').strip()
+
+        # Validaciones básicas
+        if not tipo or not marca or not modelo or not serial:
+            return Response({"error": "Los campos tipo, marca, modelo y serial son obligatorios."}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if Dispositivo.objects.filter(serial=serial).exists():
+            return Response({"error": "Ya existe un dispositivo con este número de serial."}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Crear el dispositivo
+            dispositivos = Dispositivo.objects.create(
+                tipo=tipo,
+                marca=marca,
+                modelo=modelo,
+                serial=serial,
+                estado=estado,
+                capacidad_memoria_ram=capacidad_memoria_ram,
+                capacidad_disco_duro=capacidad_disco_duro,
+            )
+            return Response({"message": "Dispositivo registrado exitosamente."}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            logger.error(f"Error al registrar el dispositivo: {str(e)}")
+            return Response({"error": "Ocurrió un error al registrar el dispositivo."}, 
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)

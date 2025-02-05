@@ -27,6 +27,7 @@ class RolUser(AbstractUser):
         ('admin', 'Administrador'),
         ('coordinador', 'Coordinador'),
     ]
+    is_active = models.BooleanField(default=True)
     rol = models.CharField(max_length=15, choices=ROLES_CHOICES, default='coordinador')
     nombre = models.CharField("Nombre completo", max_length=150, blank=True, null=True)
     celular = models.CharField("Celular", max_length=15, blank=True, null=True)
