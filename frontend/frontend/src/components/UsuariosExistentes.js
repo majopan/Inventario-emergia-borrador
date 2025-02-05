@@ -283,8 +283,9 @@ const UsuariosExistentes = () => {
         <div className="input-group select-wrapper">
           <label>Rol</label>
           <select value={newUser.rol} onChange={(e) => setNewUser({ ...newUser, rol: e.target.value })}>
-            <option value="usuario">Usuario</option>
-            <option value="admin">Administrador</option>
+            <option value="coordinador">---</option>
+            <option value="Coordinador">coordinador</option>
+            <option value="Administrador">Administrador</option>
           </select>
         </div>
         <button className="create-button" onClick={addUser}>
