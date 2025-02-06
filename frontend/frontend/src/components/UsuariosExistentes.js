@@ -24,6 +24,16 @@ const UsuariosExistentes = () => {
     type: "error", // Puede ser "error" o "success"
   });
 
+  // Efecto para ocultar la alerta después de 3 segundos
+  useEffect(() => {
+    if (alert.show) {
+      const timer = setTimeout(() => {
+        setAlert({ ...alert, show: false });
+      }, 3000); // 3000 ms = 3 segundos
+      return () => clearTimeout(timer); // Limpiar el timer si el componente se desmonta
+    }
+  }, [alert]);
+
   // Fetch the list of users
   const fetchUsers = useCallback(async () => {
     try {
