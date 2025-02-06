@@ -98,7 +98,7 @@ def user_detail_view(request, user_id):
     return Response(serializer.data, status=200)
 
 
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes # type: ignore # type: ignore
 from rest_framework.response import Response
 from rest_framework import status
 from .models import RolUser
@@ -356,3 +356,5 @@ def dispositivo_view(request):
             logger.error(f"Error al registrar el dispositivo: {str(e)}")
             return Response({"error": "Ocurrió un error al registrar el dispositivo."}, 
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            
