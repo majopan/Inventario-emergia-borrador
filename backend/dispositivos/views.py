@@ -1,20 +1,20 @@
 
-from django.contrib.auth.hashers import make_password
-from django.core.mail import send_mail
-from django.conf import settings
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .models import RolUser, Sede , Dispositivo
+from django.contrib.auth.hashers import make_password # type: ignore
+from django.core.mail import send_mail # type: ignore
+from django.conf import settings # type: ignore # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework.decorators import api_view # type: ignore
+from .models import RolUser, Sede , Dispositivo # type: ignore
 import logging
-from rest_framework import viewsets
-logger = logging.getLogger(__name__)
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import LoginSerializer
-from django.contrib.auth.models import User
-from .serializers import RolUserSerializer
+from rest_framework import viewsets # type: ignore
+logger = logging.getLogger(__name__) # type: ignore
+from rest_framework.permissions import IsAuthenticated # type: ignore
+from rest_framework.decorators import api_view, permission_classes # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework import status # type: ignore
+from .serializers import LoginSerializer # type: ignore
+from django.contrib.auth.models import User # type: ignore
+from .serializers import RolUserSerializer 
 
 
 
@@ -64,18 +64,18 @@ def login_view(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth.hashers import make_password
+from rest_framework.decorators import api_view # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework import status # type: ignore
+from django.contrib.auth.hashers import make_password # type: ignore # type: ignore
 from .models import RolUser, Sede
 import logging
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view # type: ignore
+from rest_framework.response import Response # type: ignore
+from django.shortcuts import get_object_or_404 # type: ignore
 from .models import RolUser
 from .serializers import RolUserSerializer
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -98,8 +98,35 @@ def user_detail_view(request, user_id):
     return Response(serializer.data, status=200)
 
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from .models import RolUser
+import logging
+
+logger = logging.getLogger(__name__)
+
 @api_view(['PUT'])
-@permission_classes([AllowAny])
+@permission_classes([])  # Sin permisos de autenticación
+def activate_user_view(request, user_id):
+    """
+    Activa un usuario cambiando el campo 'is_active' a True.
+    """
+    try:
+        user = RolUser.objects.get(id=user_id)
+    except RolUser.DoesNotExist:
+        return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+    if user.is_active:
+        return Response({"message": "El usuario ya está activo."}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.is_active = True
+    user.save()
+    return Response({"message": "Usuario activado exitosamente."}, status=status.HTTP_200_OK)
+
+
+@api_view(['PUT'])
+@permission_classes([])  # Sin permisos de autenticación
 def deactivate_user_view(request, user_id):
     """
     Desactiva un usuario cambiando el campo 'is_active' a False.
@@ -109,11 +136,13 @@ def deactivate_user_view(request, user_id):
     except RolUser.DoesNotExist:
         return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Desactivar usuario
+    if not user.is_active:
+        return Response({"message": "El usuario ya está desactivado."}, status=status.HTTP_400_BAD_REQUEST)
+
     user.is_active = False
     user.save()
-
     return Response({"message": "Usuario desactivado exitosamente."}, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -182,9 +211,9 @@ def register_user_view(request):
         logger.error(f"Error al registrar el usuario: {str(e)}")
         return Response({"error": "Ocurrió un error al registrar el usuario."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.decorators import api_view # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework import status # type: ignore
 from .models import RolUser
 from .serializers import RolUserSerializer , DispositivoSerializer
 

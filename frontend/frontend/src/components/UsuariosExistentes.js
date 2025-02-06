@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { FaUser, FaEdit, FaPlus } from "react-icons/fa";
-import "./UsuariosExistentes.css";
+import "../styles/UsuariosExistentes.css";
 
 const UsuariosExistentes = () => {
   const [users, setUsers] = useState([]);
@@ -59,20 +59,21 @@ const UsuariosExistentes = () => {
   };
 
   // Toggle user status (activate/deactivate)
-  const toggleUserStatus = async (userId, isActive) => {
-    try {
-      if (isActive) {
-        await axios.put(`http://127.0.0.1:8000/api/deusuarios/${userId}/`);
-        console.log("Usuario desactivado exitosamente.");
-      } else {
-        await axios.put(`http://127.0.0.1:8000/api/activarusuarios/${userId}/`);
-        console.log("Usuario activado exitosamente.");
-      }
-      fetchUsers();
-    } catch (error) {
-      console.error("Error al cambiar el estado del usuario:", error);
-    }
-  };
+// Toggle user status (activate/deactivate)
+const toggleUserStatus = async (userId, isActive) => {
+  try {
+    const endpoint = isActive
+      ? `http://127.0.0.1:8000/api/deusuarios/${userId}/`
+      : `http://127.0.0.1:8000/api/activarusuarios/${userId}/`;
+
+      await axios.put(endpoint);
+    console.log(`Usuario ${isActive ? "desactivado" : "activado"} exitosamente.`);
+    fetchUsers(); // Refrescar la lista de usuarios después del cambio
+  } catch (error) {
+    console.error("Error al cambiar el estado del usuario:", error);
+  }
+};
+
 
   // Add new user
   const addUser = async () => {
@@ -136,18 +137,19 @@ const UsuariosExistentes = () => {
                   </div>
                 </div>
                 <div className="user-actions">
-                  <button className="action-button edit" onClick={() => fetchUserDetails(user.id)}>
-                    <FaEdit />
-                  </button>
-                  <label className="switch">
-                    <input
-                      type="checkbox"
-                      checked={user.is_active}
-                      onChange={() => toggleUserStatus(user.id, user.is_active)}
-                    />
-                    <span className="slider round"></span>
-                  </label>
-                </div>
+  <button className="action-button edit" onClick={() => fetchUserDetails(user.id)}>
+    <FaEdit />
+  </button>
+  <label className="switch">
+    <input
+      type="checkbox"
+      checked={user.is_active}
+      onChange={() => toggleUserStatus(user.id, user.is_active)}
+    />
+    <span className="slider round"></span>
+  </label>
+</div>
+
               </div>
             ))
           ) : (
