@@ -187,3 +187,7 @@ EMAIL_HOST_USER = 'e-inventory@emergiacc.com'
 EMAIL_HOST_PASSWORD = 'ikdu yztg avoj tasc'  # O una contraseña de aplicación si usas Google
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10  # Cambia este valor según tus necesidades
+}

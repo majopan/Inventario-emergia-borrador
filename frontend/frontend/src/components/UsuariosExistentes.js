@@ -14,7 +14,7 @@ const UsuariosExistentes = () => {
     email: "",
     documento: "",
     celular: "",
-    rol: "usuario",
+    rol: "coordinador", // Valor predeterminado según el modelo de Django
     password: "",
     confirm_password: "",
   });
@@ -23,6 +23,8 @@ const UsuariosExistentes = () => {
     message: "",
     type: "error", // Puede ser "error" o "success"
   });
+
+  
 
   // Efecto para ocultar la alerta después de 3 segundos
   useEffect(() => {
@@ -201,7 +203,7 @@ const UsuariosExistentes = () => {
                 <div className="user-info" onClick={() => fetchUserDetails(user.id)}>
                   <div className="user-name">{user.nombre}</div>
                   <div className="user-access">
-                    {user.rol === "admin" ? "Acceso total" : "Acceso limitado"}
+                    {user.rol === "admin" ? "Administrador" : "Coordinador"}
                   </div>
                 </div>
                 <div className="user-actions">
@@ -351,10 +353,12 @@ const UsuariosExistentes = () => {
                 </div>
                 <div className="input-group select-wrapper">
                   <label>Rol</label>
-                  <select value={newUser.rol} onChange={(e) => setNewUser({ ...newUser, rol: e.target.value })}>
-                    <option value="coordinador">---</option>
-                    <option value="Coordinador">coordinador</option>
-                    <option value="Administrador">Administrador</option>
+                  <select
+                    value={newUser.rol}
+                    onChange={(e) => setNewUser({ ...newUser, rol: e.target.value })}
+                  >
+                    <option value="coordinador">Coordinador</option>
+                    <option value="admin">Administrador</option>
                   </select>
                 </div>
                 <button className="create-button" onClick={addUser}>
