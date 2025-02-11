@@ -56,3 +56,13 @@ class DispositivoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dispositivo
         fields = '__all__'  # Incluir todos los campos del modelo
+
+
+
+from rest_framework import serializers
+from .models import Posicion
+
+class PosicionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Posicion
+        fields = '__all__'  # Incluye todos los campos del modelo

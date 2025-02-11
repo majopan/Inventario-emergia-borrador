@@ -358,3 +358,20 @@ def dispositivo_view(request):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             
+# vistas para las posiciones
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from .models import Posicion
+from .serializers import PosicionSerializer
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def posiciones_view(request):
+    # Obtener todas las posiciones
+    posiciones = Posicion.objects.all()
+    serializer = PosicionSerializer(posiciones, many=True)
+
+    # Devolver los datos serializados directamente
+    return Response(serializer.data, status=200)

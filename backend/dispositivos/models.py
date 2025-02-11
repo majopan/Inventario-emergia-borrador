@@ -73,16 +73,44 @@ class Servicios(models.Model):
         verbose_name_plural = "Servicios"
 
 
+
 class Posicion(models.Model):
+    # Opciones para el campo "piso" (ahora incluye pisos y torres)
     PISOS = [
         ('PISO1', 'Piso 1'),
         ('PISO2', 'Piso 2'),
         ('PISO3', 'Piso 3'),
         ('PISO4', 'Piso 4'),
+        ('TORRE1', 'Torre 1'),  # Torre 1 como opción en "piso"
     ]
-    piso = models.CharField(max_length=5, choices=PISOS)
-    nombre = models.CharField(max_length=100)
-    descripcion = models.TextField(null=True, blank=True)
+
+    # Opciones para el campo "status"
+    ESTADOS = [
+        ('available', 'Disponible'),
+        ('reserved', 'Reservado'),
+        ('inactive', 'Inactivo'),  # Nuevo estado "inactivo"
+    ]
+
+    # Opciones para el campo "color"
+    COLORES = [
+        ('default', 'Por defecto'),
+        ('yellow', 'Amarillo'),
+        ('red-mark', 'Marca roja'),
+        ('red-dot', 'Punto rojo'),
+        ('orange', 'Naranja'),
+    ]
+
+    # Campos actuales
+    piso = models.CharField(max_length=10, choices=PISOS)  # Piso o torre del espacio
+    nombre = models.CharField(max_length=100)  # Nombre del espacio
+    descripcion = models.TextField(null=True, blank=True)  # Descripción del espacio
+
+    # Nuevos campos para almacenar la información del JSON
+    id_espacio = models.CharField(max_length=10, unique=True, null=True, blank=True)
+    status = models.CharField(max_length=10, choices=ESTADOS, default='available')  # Estado del espacio
+    color = models.CharField(max_length=10, choices=COLORES, default='default')  # Color del espacio
+    posicion_x = models.IntegerField()  # Coordenada X
+    posicion_y = models.IntegerField()  # Coordenada Y
 
     def __str__(self):
         return self.nombre

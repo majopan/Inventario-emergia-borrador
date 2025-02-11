@@ -1,34 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Plans.css";
-import "./terraza2-section.css"; // Importamos los estilos de Terraza2Section
+import "./terraza2-section.css";
 import Terraza1Section from "./Terraza1Section";
-import Terraza2Section from "./Terraza2Section"; // Importamos Terraza2Section
-import Terraza3Section from "./Terraza3Section"; // Importamos Terraza2Section
+import Terraza2Section from "./Terraza2Section";
+import Terraza3Section from "./Terraza3Section";
+import Modal from "../components/Modal"; // Importa el componente Modal
 
 const Plans = () => {
   const [scale, setScale] = useState(1);
   const [transformOrigin, setTransformOrigin] = useState("center center");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCell, setSelectedCell] = useState(null);
+  const [planData, setPlanData] = useState([]);
+
+  // Obtén los datos desde la API o archivo JSON
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/posiciones/")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Datos recibidos:", data);
+        setPlanData(data);
+      })
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
 
   const handleZoom = (event, factor) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const offsetX = event.clientX - rect.left;
     const offsetY = event.clientY - rect.top;
 
-    // Calcular el nuevo origen de la transformación
     const originX = (offsetX / rect.width) * 100;
     const originY = (offsetY / rect.height) * 100;
     setTransformOrigin(`${originX}% ${originY}%`);
 
-    // Aplicar el zoom
-    setScale((prev) => {
-      const newScale = prev * factor;
-      return Math.min(Math.max(newScale, 0.5), 2); // Límites de zoom
-    });
+    setScale((prev) => Math.min(Math.max(prev * factor, 0.5), 2));
   };
 
   const resetZoom = () => {
     setScale(1);
     setTransformOrigin("center center");
+  };
+
+  const handleCellClick = (cell) => {
+    setSelectedCell(cell);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedCell(null);
   };
 
   return (
@@ -48,16 +68,29 @@ const Plans = () => {
               transformOrigin: transformOrigin,
             }}
           >
-            {/* Left Section */}
             <div className="left-section">
+              {/* Cafeteria */}
               <div className="cafeteria">
                 <span>Cafeteria</span>
               </div>
 
+              {/* Celdas dinámicas */}
               <div className="training-room">
                 <div className="training-cells">
-                  <div className="cell yellow">E001</div>
-                  <div className="cell yellow">E002</div>
+                  {planData.map((cell) => (
+                    <div
+                      key={cell.id}
+                      className={`cell ${cell.color}`}
+                      style={{
+                        position: "absolute",
+                        left: `${cell.posicion_x}px`,
+                        top: `${cell.posicion_y}px`,
+                      }}
+                      onClick={() => handleCellClick(cell)}
+                    >
+                      {cell.id_espacio}
+                    </div>
+                  ))}
                 </div>
                 <div className="training-label">
                   Sala Capacitaciones
@@ -65,37 +98,19 @@ const Plans = () => {
                   formacion
                 </div>
               </div>
-
-              <div className="bottom-cells">
-                <div className="row">
-                  <div className="cell">E003</div>
-                  <div className="cell">E004</div>
-                  <div className="cell">E005</div>
-                  <div className="cell red-mark">E006</div>
-                </div>
-                <div className="row">
-                  <div className="cell"> </div>
-                  <div className="cell"> </div>
-                  <div className="cell"> </div>
-                  <div className="cell"> </div>
-                </div>
-                <div className="row">
-                  <div className="cell">E007</div>
-                  <div className="cell red-dot">E008</div>
-                  <div className="cell orange">E009</div>
-                  <div className="cell">E010</div>
-                </div>
-              </div>
             </div>
-            {/* Center Section - Reemplazada por TerrazaSection */}
+
+            {/* Otras secciones */}
             <Terraza3Section />
-            {/* Right Section - Reemplazada por Terraza2Section */}
             <Terraza2Section />
             <Terraza1Section />
           </div>
         </div>
       </div>
+
+      <Modal isOpen={isModalOpen} onClose={closeModal} cell={selectedCell} />
     </div>
   );
 };
+
 export default Plans;

@@ -31,7 +31,7 @@ const UsuariosExistentes = () => {
     if (alert.show) {
       const timer = setTimeout(() => {
         setAlert({ ...alert, show: false });
-      }, 3000); // 3000 ms = 3 segundos
+      }, 1500); // 3000 ms = 3 segundos
       return () => clearTimeout(timer); // Limpiar el timer si el componente se desmonta
     }
   }, [alert]);
