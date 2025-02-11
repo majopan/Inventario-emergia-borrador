@@ -122,7 +122,8 @@ class Posicion(models.Model):
 
 class Dispositivo(models.Model):
     TIPOS_DISPOSITIVOS = [
-        ('CPU', 'Computador'),
+        ('COMPUTADOR', 'Computador'),
+        ('DESKTOP', 'Desktop'),
         ('MONITOR', 'Monitor'),
         ('TABLET', 'Tablet'),
         ('MOVIL', 'Celular'),

@@ -46,7 +46,13 @@ urlpatterns = [
     # Rutas para sedes y dispositivos
     path('api/sedes/', views.get_sedes_view, name='get_sedes_view'),
     path('api/dispositivos/', views.dispositivo_view, name='dispositivo_view'),
-
+    path('api/dispositivos/<int:dispositivo_id>/', views.dispositivo_detail_view, name='dispositivo_view'),
+    path('api/servicios/', views.servicios_view, name='servicios_view'),
+    path('api/servicios/<int:servicio_id>/', views.servicio_detail_view, name='servicio_detail_view'),
+    path('api/sedes/', views.sede_view, name='sede_view'),
+    path('api/sedes/<int:sede_id>/', views.sede_detail_view, name='sede_detail_view'),
+    
+    
     # Rutas para usuarios (detalles y lista)
     path('api/usuarios/', views.get_users_view, name='get_users_view'),
     path('api/usuarios/<int:user_id>/', views.user_detail_view, name='user_detail'),

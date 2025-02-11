@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate# type: ignore
-from .models import RolUser, Sede, Dispositivo
+from .models import RolUser, Sede, Dispositivo, Servicios
 
 class SedeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -66,3 +66,8 @@ class PosicionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Posicion
         fields = '__all__'  # Incluye todos los campos del modelo
+        
+class ServiciosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Servicios
+        fields = '__all__'

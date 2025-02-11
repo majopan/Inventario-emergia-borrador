@@ -16,6 +16,22 @@ from .serializers import LoginSerializer # type: ignore
 from django.contrib.auth.models import User # type: ignore
 from .serializers import RolUserSerializer 
 
+from django.contrib.auth.hashers import make_password # type: ignore
+from django.core.mail import send_mail # type: ignore
+from django.conf import settings # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework.decorators import api_view # type: ignore
+from .models import RolUser, Sede , Dispositivo , Servicios
+import logging
+from rest_framework import viewsets # type: ignore
+logger = logging.getLogger(__name__)
+from rest_framework.permissions import IsAuthenticated # type: ignore
+from rest_framework.decorators import api_view, permission_classes # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework import status# type: ignore
+from django.contrib.auth.models import User # type: ignore
+from .serializers import RolUserSerializer , ServiciosSerializer , LoginSerializer , DispositivoSerializer , SedeSerializer
+
 
 
 @api_view(['GET' ])
@@ -357,7 +373,234 @@ def dispositivo_view(request):
             return Response({"error": "Ocurrió un error al registrar el dispositivo."}, 
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([AllowAny])
+def dispositivo_detail_view(request, dispositivo_id):
+    """
+    Maneja la obtención, actualización y eliminación de un dispositivo específico.
+    """
+    try:
+        # Intentar obtener el dispositivo por su ID
+        dispositivo = Dispositivo.objects.get(id=dispositivo_id)
+    except Dispositivo.DoesNotExist:
+        return Response({"error": "El dispositivo no existe."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        # Obtener los detalles del dispositivo
+        serializer = DispositivoSerializer(dispositivo)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'PUT':
+        # Actualizar los detalles del dispositivo
+        data = request.data
+
+        # Validar y actualizar los campos
+        dispositivo.tipo = data.get('tipo', dispositivo.tipo).strip()
+        dispositivo.marca = data.get('marca', dispositivo.marca).strip()
+        dispositivo.modelo = data.get('modelo', dispositivo.modelo).strip()
+        dispositivo.serial = data.get('serial', dispositivo.serial).strip()
+        dispositivo.estado = data.get('estado', dispositivo.estado).strip()
+        dispositivo.capacidad_memoria_ram = data.get('capacidad_memoria_ram', dispositivo.capacidad_memoria_ram).strip()
+        dispositivo.capacidad_disco_duro = data.get('capacidad_disco_duro', dispositivo.capacidad_disco_duro).strip()
+
+        # Validaciones
+        if not dispositivo.tipo or not dispositivo.marca or not dispositivo.modelo or not dispositivo.serial:
+            return Response({"error": "Los campos tipo, marca, modelo y serial son obligatorios."}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar si ya existe otro dispositivo con el mismo serial
+        if Dispositivo.objects.filter(serial=dispositivo.serial).exclude(id=dispositivo.id).exists():
+            return Response({"error": "Ya existe otro dispositivo con este número de serial."}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Guardar cambios
+            dispositivo.save()
+            return Response({"message": "Dispositivo actualizado exitosamente."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error al actualizar el dispositivo: {str(e)}")
+            return Response({"error": "Ocurrió un error al actualizar el dispositivo."}, 
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    elif request.method == 'DELETE':
+        # Eliminar el dispositivo
+        try:
+            dispositivo.delete()
+            return Response({"message": "Dispositivo eliminado exitosamente."}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            logger.error(f"Error al eliminar el dispositivo: {str(e)}")
+            return Response({"error": "Ocurrió un error al eliminar el dispositivo."}, 
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
+            
+            
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def servicios_view(request):
+    """
+    Maneja la creación y listado de servicios.
+    """
+
+    if request.method == 'GET':
+        # Obtener todos los servicios
+        servicios = Servicios.objects.all()
+        serializer = ServiciosSerializer(servicios, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'POST':
+        # Crear un nuevo servicio
+        data = request.data
+
+        nombre = data.get('nombre', '').strip()
+        codigo_analitico = data.get('codigo_analitico', '').strip()
+        sede_id = data.get('sede')
+
+        # Validar campos requeridos
+        if not nombre:
+            return Response({"error": "El campo 'nombre' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Crear el servicio
+            servicio = Servicios.objects.create(
+                nombre=nombre,
+                codigo_analitico=codigo_analitico,
+                sede_id=sede_id
+            )
+            return Response({"message": "Servicio creado exitosamente."}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            logger.error(f"Error al crear el servicio: {str(e)}")
+            return Response({"error": "Ocurrió un error al crear el servicio."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([AllowAny])
+def servicio_detail_view(request, servicio_id):
+    """
+    Maneja la obtención, actualización y eliminación de un servicio específico.
+    """
+    try:
+        # Intentar obtener el servicio por su ID
+        servicio = Servicios.objects.get(id=servicio_id)
+    except Servicios.DoesNotExist:
+        return Response({"error": "El servicio no existe."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        # Obtener los detalles del servicio
+        serializer = ServiciosSerializer(servicio)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'PUT':
+        # Actualizar los detalles del servicio
+        data = request.data
+
+        servicio.nombre = data.get('nombre', servicio.nombre).strip()
+        servicio.codigo_analitico = data.get('codigo_analitico', servicio.codigo_analitico).strip()
+        servicio.sede_id = data.get('sede', servicio.sede_id)
+
+        # Validar campos obligatorios
+        if not servicio.nombre:
+            return Response({"error": "El campo 'nombre' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Guardar cambios
+            servicio.save()
+            return Response({"message": "Servicio actualizado exitosamente."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error al actualizar el servicio: {str(e)}")
+            return Response({"error": "Ocurrió un error al actualizar el servicio."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    elif request.method == 'DELETE':
+        # Eliminar el servicio
+        try:
+            servicio.delete()
+            return Response({"message": "Servicio eliminado exitosamente."}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            logger.error(f"Error al eliminar el servicio: {str(e)}")
+            return Response({"error": "Ocurrió un error al eliminar el servicio."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+        
+        
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def sede_view(request):
+    """
+    Maneja la creación y listado de sedes.
+    """
+    if request.method == 'GET':
+        # Listar todas las sedes
+        sedes = Sede.objects.all()
+        serializer = SedeSerializer(sedes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'POST':
+        # Crear una nueva sede
+        data = request.data
+
+        nombre = data.get('nombre', '').strip()
+        direccion = data.get('direccion', '').strip()
+        ciudad = data.get('ciudad', '').strip()
+
+        # Validar campos obligatorios
+        if not nombre:
+            return Response({"error": "El campo 'nombre' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Crear la sede
+            sede = Sede.objects.create(nombre=nombre, direccion=direccion, ciudad=ciudad)
+            return Response({"message": "Sede creada exitosamente."}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Error al crear la sede: {str(e)}")
+            return Response({"error": "Ocurrió un error al crear la sede."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([AllowAny])
+def sede_detail_view(request, sede_id):
+    """
+    Maneja la obtención, actualización y eliminación de una sede específica.
+    """
+    try:
+        # Intentar obtener la sede por su ID
+        sede = Sede.objects.get(id=sede_id)
+    except Sede.DoesNotExist:
+        return Response({"error": "La sede no existe."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        # Obtener los detalles de la sede
+        serializer = SedeSerializer(sede)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'PUT':
+        # Actualizar los detalles de la sede
+        data = request.data
+
+        sede.nombre = data.get('nombre', sede.nombre).strip()
+        sede.direccion = data.get('direccion', sede.direccion).strip()
+        sede.ciudad = data.get('ciudad', sede.ciudad).strip()
+
+        # Validar campos obligatorios
+        if not sede.nombre:
+            return Response({"error": "El campo 'nombre' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Guardar cambios
+            sede.save()
+            return Response({"message": "Sede actualizada exitosamente."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error al actualizar la sede: {str(e)}")
+            return Response({"error": "Ocurrió un error al actualizar la sede."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    elif request.method == 'DELETE':
+        # Eliminar la sede
+        try:
+            sede.delete()
+            return Response({"message": "Sede eliminada exitosamente."}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            logger.error(f"Error al eliminar la sede: {str(e)}")
+            return Response({"error": "Ocurrió un error al eliminar la sede."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 # vistas para las posiciones
 
 from rest_framework.decorators import api_view, permission_classes
