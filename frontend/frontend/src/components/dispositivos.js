@@ -94,7 +94,7 @@ const Dispositivos = () => {
   };
 
   return (
-    <div className="records-container">
+    <div>
       <div className="user-card">
         <div className="card-header">
           <h2>Gestión de Dispositivos</h2>
