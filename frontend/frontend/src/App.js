@@ -7,11 +7,13 @@ import SidebarMenu from './components/SidebarMenu'; // Importa SidebarMenu
 // Nuevas páginas
 import Login from "./pages/login";
 import Dashboard from './pages/Dashboard';
-import Inventory from './pages/Inventory';
+
 import Settings from './pages/Settings'; // No agregar la extensión .js
 import Plans from './pages/Plans';
 import Records from './pages/Records';
 import History from './pages/History';
+import Services from './pages/services';
+import Sedes from './pages/sedes';
 import Devices from './pages/Devices'; // Elimina .js
 
 function App() {
@@ -33,15 +35,7 @@ function App() {
             </div>
           }
         />
-        <Route
-          path="/inventario"
-          element={
-            <div style={{ display: "flex" }}>
-              <SidebarMenu />
-              <Inventory />
-            </div>
-          }
-        />
+
         <Route
           path="/settings"
           element={
@@ -57,6 +51,25 @@ function App() {
             <div style={{ display: "flex" }}>
               <SidebarMenu />
               <Plans />
+            </div>
+          }
+        />
+
+        <Route
+          path="/services"
+          element={
+            <div style={{ display: "flex" }}>
+              <SidebarMenu />
+              <Services />
+            </div>
+          }
+        />
+        <Route
+          path="/sedes"
+          element={
+            <div style={{ display: "flex" }}>
+              <SidebarMenu />
+              <Sedes />
             </div>
           }
         />

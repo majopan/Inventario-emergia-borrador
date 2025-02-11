@@ -27,18 +27,28 @@ const SidebarMenu = () => {
         <BsDiagram3 size={20} />
         <span>Planos</span>
       </Link>
+      <Link to="/dispositivos" className={isActive('/dispositivos')}>
+        <IoIosDesktop size={20} />
+        <span>Dispositivos</span>
+      </Link>
+
       <Link to="/registro" className={isActive('/registro')}>
         <AiOutlineFileText size={20} />
-        <span>Registros</span>
+        <span>usuarios</span>
+      </Link>
+      <Link to="/services" className={isActive('/services')}>
+        <IoIosDesktop size={20} />
+        <span>servicios</span>
+      </Link>
+      <Link to="/sedes" className={isActive('/sedes')}>
+        <IoIosDesktop size={20} />
+        <span>sedes</span>
       </Link>
       <Link to="/historial" className={isActive('/historial')}>
         <MdHistory size={20} />
         <span>Historial</span>
       </Link>
-      <Link to="/dispositivos" className={isActive('/dispositivos')}>
-        <IoIosDesktop size={20} />
-        <span>Dispositivos</span>
-      </Link>
+
       <Link to="/settings" className={isActive('/settings')}>
         <FaCogs size={20} />
         <span>Config</span>
