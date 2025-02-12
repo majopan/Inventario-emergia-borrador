@@ -1,7 +1,6 @@
 import React from 'react';
 import Dispositivos from '../components/dispositivos';
 import '../styles/Devices.css'; // Asegúrate de personalizar este archivo CSS según tus necesidades
-import '../styles/Registro.css';
 
 
 const Devices = () => {
