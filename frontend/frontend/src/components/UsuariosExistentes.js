@@ -31,7 +31,7 @@ const UsuariosExistentes = () => {
     if (alert.show) {
       const timer = setTimeout(() => {
         setAlert({ ...alert, show: false });
-      }, 1500); // 3000 ms = 3 segundos
+      }, 1000); // 3000 ms = 3 segundos
       return () => clearTimeout(timer); // Limpiar el timer si el componente se desmonta
     }
   }, [alert]);
@@ -234,32 +234,29 @@ const UsuariosExistentes = () => {
                 &times;
               </button>
               <div className="modal-content">
-                <h1>Detalles del usuario</h1>
+                <h1>Editar Usuario</h1>
                 <div className="input-group">
-                  <label>Nombre</label>
+                  <label>Nombre completo *</label>
                   <input
                     type="text"
                     value={selectedUser.nombre || ""}
                     onChange={(e) => setSelectedUser({ ...selectedUser, nombre: e.target.value })}
-                    placeholder="Nombre"
                   />
                 </div>
                 <div className="input-group">
-                  <label>Nombre de usuario</label>
+                  <label>Nombre de usuario *</label>
                   <input
                     type="text"
                     value={selectedUser.username || ""}
                     onChange={(e) => setSelectedUser({ ...selectedUser, username: e.target.value })}
-                    placeholder="Nombre de usuario"
                   />
                 </div>
                 <div className="input-group">
-                  <label>Correo electrónico</label>
+                  <label>Correo electrónico *</label>
                   <input
                     type="email"
                     value={selectedUser.email || ""}
                     onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
-                    placeholder="Correo electrónico"
                   />
                 </div>
                 <div className="input-group">
@@ -268,8 +265,23 @@ const UsuariosExistentes = () => {
                     type="text"
                     value={selectedUser.documento || ""}
                     onChange={(e) => setSelectedUser({ ...selectedUser, documento: e.target.value })}
-                    placeholder="Documento de identidad"
                   />
+                </div>
+                <div className="input-group">
+                  <label>Número de celular</label>
+                  <input
+                    type="text"
+                    value={selectedUser.celular || ""}
+                    onChange={(e) => setSelectedUser({ ...selectedUser, celular: e.target.value })}
+                  />
+                </div>
+                <div className="input-group select-wrapper">
+                  <label>Rol *</label>
+                  <select value={selectedUser.rol || ""} onChange={(e) => setSelectedUser({ ...selectedUser, rol: e.target.value })}>
+                    <option value="" disabled>Seleccione un rol</option>
+                    <option value="coordinador">Coordinador</option>
+                    <option value="admin">Administrador</option>
+                  </select>
                 </div>
                 <button className="create-button" onClick={() => editUser(selectedUser.id, selectedUser)}>
                   Guardar cambios
