@@ -12,6 +12,11 @@ const Dispositivos = () => {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [posiciones, setPosiciones] = useState([]);
   const [sedes, setSedes] = useState([]);
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    type: "error", // Puede ser "error" o "success"
+  });
 
   // Estado inicial de un dispositivo
   function initialDeviceState() {
@@ -55,16 +60,12 @@ const Dispositivos = () => {
   };
 
   // Obtener las sedes
-  // Obtener las sedes
   const fetchSedes = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:8000/api/sedes/");
-      console.log("Respuesta de sedes:", response.data); // Verificar la respuesta de la API
       if (response.data.sedes && Array.isArray(response.data.sedes)) {
-        setSedes(response.data.sedes);  // Guardamos solo los datos dentro de la clave "sedes"
-        console.log("Sedes guardadas:", response.data.sedes);
+        setSedes(response.data.sedes);
       } else {
-        console.error("La respuesta no tiene la estructura esperada:", response.data);
         setSedes([]);
       }
     } catch (error) {
@@ -72,7 +73,6 @@ const Dispositivos = () => {
       setSedes([]);
     }
   };
-  
 
   // Crear un nuevo dispositivo
   const addDevice = async () => {
@@ -82,8 +82,18 @@ const Dispositivos = () => {
       fetchDispositivos();
       setShowForm(false);
       setNewDevice(initialDeviceState());
+      setAlert({
+        show: true,
+        message: "Dispositivo agregado exitosamente.",
+        type: "success",
+      });
     } catch (error) {
       console.error("Error al agregar el dispositivo:", error);
+      setAlert({
+        show: true,
+        message: "Hubo un error al agregar el dispositivo.",
+        type: "error",
+      });
     }
   };
 
@@ -94,8 +104,18 @@ const Dispositivos = () => {
       await axios.put(`http://127.0.0.1:8000/api/dispositivos/${selectedDevice.id}/`, selectedDevice);
       fetchDispositivos();
       setShowDetailModal(false);
+      setAlert({
+        show: true,
+        message: "Dispositivo actualizado exitosamente.",
+        type: "success",
+      });
     } catch (error) {
       console.error("Error al actualizar el dispositivo:", error);
+      setAlert({
+        show: true,
+        message: "Hubo un error al actualizar el dispositivo.",
+        type: "error",
+      });
     }
   };
 
@@ -104,8 +124,18 @@ const Dispositivos = () => {
     try {
       await axios.delete(`http://127.0.0.1:8000/api/dispositivos/${deviceId}/`);
       fetchDispositivos();
+      setAlert({
+        show: true,
+        message: "Dispositivo eliminado exitosamente.",
+        type: "success",
+      });
     } catch (error) {
       console.error("Error al eliminar el dispositivo:", error);
+      setAlert({
+        show: true,
+        message: "Hubo un error al eliminar el dispositivo.",
+        type: "error",
+      });
     }
   };
 
@@ -146,6 +176,32 @@ const Dispositivos = () => {
     fetchData();
   }, []);
 
+  // Efecto para cerrar la alerta automáticamente después de 1 segundo
+  useEffect(() => {
+    if (alert.show) {
+      const timer = setTimeout(() => {
+        setAlert({ ...alert, show: false });
+      }, 1000); // Cerrar la alerta después de 1 segundo
+      return () => clearTimeout(timer); // Limpiar el timer si el componente se desmonta
+    }
+  }, [alert]);
+
+  // Componente de alerta
+  const AlertModal = ({ message, type, onClose }) => {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-container">
+          <div className={`alert-modal ${type}`}>
+            <p>{message}</p>
+            <button className="close-button" onClick={onClose}>
+              &times;
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div>
       <div className="user-card">
@@ -155,6 +211,15 @@ const Dispositivos = () => {
             <FaPlus />
           </button>
         </div>
+
+        {/* Mensajes de alerta */}
+        {alert.show && (
+          <AlertModal
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert({ ...alert, show: false })}
+          />
+        )}
 
         {/* Lista de dispositivos */}
         <DeviceList
@@ -318,8 +383,8 @@ const DeviceForm = ({ device, setDevice, onSubmit, posiciones, sedes }) => {
         label: pos.nombre,
       })))}
       {renderSelect("Sede", "sede", device, setDevice, Array.isArray(sedes) ? sedes.map(sede => ({
-  value: sede.id, // Asegúrate de que "id" sea el identificador único
-  label: sede.nombre, // Utiliza "nombre" para el nombre de la sede
+  value: sede.id,
+  label: sede.nombre,
 })) : [])}
 
       <button className="create-button" onClick={onSubmit}>
@@ -352,13 +417,12 @@ const renderSelect = (label, field, device, setDevice, options) => (
     >
       <option value="">Seleccione una opción</option>
       {options.map((opt) => (
-        <option key={opt.value} value={opt.value}> {/* key único añadido */}
+        <option key={opt.value} value={opt.value}>
           {opt.label}
         </option>
       ))}
     </select>
   </div>
 );
-
 
 export default Dispositivos;
