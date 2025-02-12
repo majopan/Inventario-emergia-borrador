@@ -24,8 +24,6 @@ const UsuariosExistentes = () => {
     type: "error", // Puede ser "error" o "success"
   });
 
-  
-
   // Efecto para ocultar la alerta después de 3 segundos
   useEffect(() => {
     if (alert.show) {
@@ -183,6 +181,14 @@ const UsuariosExistentes = () => {
     );
   };
 
+  // Manejador para cerrar el modal cuando se hace clic fuera de él
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setShowDetailModal(false);
+      setShowForm(false);
+    }
+  };
+
   return (
     <div className="records-container">
       <div className="user-card">
@@ -228,8 +234,8 @@ const UsuariosExistentes = () => {
 
         {/* Modal para ver y editar detalles del usuario */}
         {showDetailModal && selectedUser && (
-          <div className="modal-overlay">
-            <div className="modal-container">
+          <div className="modal-overlay" onClick={handleOverlayClick}>
+            <div className="modal-container" onClick={(e) => e.stopPropagation()}>
               <button className="close-button" onClick={() => setShowDetailModal(false)}>
                 &times;
               </button>
@@ -293,8 +299,8 @@ const UsuariosExistentes = () => {
 
         {/* Modal para agregar nuevo usuario */}
         {showForm && (
-          <div className="modal-overlay">
-            <div className="modal-container">
+          <div className="modal-overlay" onClick={handleOverlayClick}>
+            <div className="modal-container" onClick={(e) => e.stopPropagation()}>
               <button className="close-button" onClick={() => setShowForm(false)}>
                 &times;
               </button>
