@@ -1,4 +1,4 @@
-    import "./Terraza1Section.css"
+    import "../styles/Terraza1Section.css"
 
     const CompleteFloorPlan = () => {
     return (

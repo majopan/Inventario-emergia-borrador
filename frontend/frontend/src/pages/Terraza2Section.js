@@ -1,5 +1,5 @@
     import React from "react";
-    import "./terraza2-section.css"; // Importamos los estilos de Terraza2Section
+    import "../styles/terraza2-section.css"; // Importamos los estilos de Terraza2Section
 
 
     // Terraza2Section Component

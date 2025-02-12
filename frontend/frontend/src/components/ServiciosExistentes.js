@@ -14,6 +14,11 @@ const ServiciosExistentes = () => {
     codigo_analitico: "",
     sede: "",
   });
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    type: "error", // Puede ser "error" o "success"
+  });
 
   // Fetch the list of services
   const fetchServices = useCallback(async () => {
@@ -30,11 +35,17 @@ const ServiciosExistentes = () => {
   const fetchSedes = useCallback(async () => {
     try {
       const response = await axios.get("http://127.0.0.1:8000/api/sedes/");
-      setSedes(Array.isArray(response.data) ? response.data : []);
+      if (Array.isArray(response.data.sedes)) {  // Cambiar a 'response.data.sedes' si la respuesta está anidada
+        setSedes(response.data.sedes);
+      } else {
+        console.error("La respuesta de sedes no tiene el formato esperado");
+        setSedes([]);
+      }
     } catch (error) {
       console.error("Error al obtener sedes:", error);
     }
   }, []);
+  
 
   // Fetch service details
   const fetchServiceDetails = async (serviceId) => {
@@ -51,16 +62,29 @@ const ServiciosExistentes = () => {
   const editService = async (serviceId, updatedServiceData) => {
     try {
       if (!updatedServiceData.nombre) {
-        console.error("El campo 'nombre' es obligatorio.");
+        setAlert({
+          show: true,
+          message: "El campo 'nombre' es obligatorio.",
+          type: "error",
+        });
         return;
       }
 
       await axios.put(`http://127.0.0.1:8000/api/servicios/${serviceId}/`, updatedServiceData);
-      console.log("Servicio editado exitosamente.");
       fetchServices();
       setShowDetailModal(false);
+      setAlert({
+        show: true,
+        message: "Servicio editado exitosamente.",
+        type: "success",
+      });
     } catch (error) {
       console.error("Error al editar el servicio:", error);
+      setAlert({
+        show: true,
+        message: "Hubo un error al editar el servicio.",
+        type: "error",
+      });
     }
   };
 
@@ -68,27 +92,49 @@ const ServiciosExistentes = () => {
   const deleteService = async (serviceId) => {
     try {
       await axios.delete(`http://127.0.0.1:8000/api/servicios/${serviceId}/`);
-      console.log("Servicio eliminado exitosamente.");
       fetchServices();
+      setAlert({
+        show: true,
+        message: "Servicio eliminado exitosamente.",
+        type: "success",
+      });
     } catch (error) {
       console.error("Error al eliminar el servicio:", error);
+      setAlert({
+        show: true,
+        message: "Hubo un error al eliminar el servicio.",
+        type: "error",
+      });
     }
   };
 
   // Add new service
   const addService = async () => {
     if (!newService.nombre) {
-      console.error("El campo 'nombre' es obligatorio.");
+      setAlert({
+        show: true,
+        message: "El campo 'nombre' es obligatorio.",
+        type: "error",
+      });
       return;
     }
 
     try {
       await axios.post("http://127.0.0.1:8000/api/servicios/", newService);
-      console.log("Servicio agregado exitosamente.");
       setShowForm(false);
       fetchServices();
+      setAlert({
+        show: true,
+        message: "Servicio agregado exitosamente.",
+        type: "success",
+      });
     } catch (error) {
       console.error("Error al agregar el servicio:", error);
+      setAlert({
+        show: true,
+        message: "Hubo un error al agregar el servicio.",
+        type: "error",
+      });
     }
   };
 
@@ -97,6 +143,32 @@ const ServiciosExistentes = () => {
     fetchServices();
     fetchSedes();
   }, [fetchServices, fetchSedes]);
+
+  // Efecto para cerrar la alerta automáticamente después de 1 segundo
+  useEffect(() => {
+    if (alert.show) {
+      const timer = setTimeout(() => {
+        setAlert({ ...alert, show: false });
+      }, 1000); // Cerrar la alerta después de 1 segundo
+      return () => clearTimeout(timer); // Limpiar el timer si el componente se desmonta
+    }
+  }, [alert]);
+
+  // Componente de alerta
+  const AlertModal = ({ message, type, onClose }) => {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-container">
+          <div className={`alert-modal ${type}`}>
+            <p>{message}</p>
+            <button className="close-button" onClick={onClose}>
+              &times;
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="records-container">
@@ -108,6 +180,16 @@ const ServiciosExistentes = () => {
           </button>
         </div>
 
+        {/* Mensajes de alerta */}
+        {alert.show && (
+          <AlertModal
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert({ ...alert, show: false })}
+          />
+        )}
+
+        {/* Lista de servicios */}
         <div className="user-list">
           {services.length > 0 ? (
             services.map((service) => (
@@ -134,7 +216,7 @@ const ServiciosExistentes = () => {
           )}
         </div>
 
-        {/* Modal for viewing and editing service details */}
+        {/* Modal para ver y editar detalles del servicio */}
         {showDetailModal && selectedService && (
           <div className="modal-overlay">
             <div className="modal-container">
@@ -183,7 +265,7 @@ const ServiciosExistentes = () => {
           </div>
         )}
 
-        {/* Modal for adding new service */}
+        {/* Modal para agregar nuevo servicio */}
         {showForm && (
           <div className="modal-overlay">
             <div className="modal-container">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import "./Plans.css";
-import "./terraza2-section.css";
+import "../styles/Plans.css";
+import "../styles/terraza2-section.css";
 import Terraza1Section from "./Terraza1Section";
 import Terraza2Section from "./Terraza2Section";
 import Terraza3Section from "./Terraza3Section";
