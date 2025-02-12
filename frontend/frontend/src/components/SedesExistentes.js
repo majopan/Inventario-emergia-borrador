@@ -13,12 +13,29 @@ const SedesExistentes = () => {
     direccion: "",
     ciudad: "",
   });
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    type: "error", // Puede ser "error" o "success"
+  });
 
   // Fetch the list of sedes
   const fetchSedes = useCallback(async () => {
     try {
       const response = await axios.get("http://127.0.0.1:8000/api/sedes/");
-      setSedes(Array.isArray(response.data) ? response.data : []);
+      console.log(response.data); // Agregar para inspeccionar la respuesta
+      
+      // Asegúrate de que la respuesta sea un array
+      if (Array.isArray(response.data)) {
+        setSedes(response.data);
+      } else if (response.data.sedes && Array.isArray(response.data.sedes)) {
+        // Si la respuesta tiene una clave "sedes"
+        setSedes(response.data.sedes);
+      } else {
+        // Si la respuesta no tiene el formato esperado
+        console.error("La respuesta de sedes no tiene el formato esperado");
+        setSedes([]);
+      }
     } catch (error) {
       console.error("Error al obtener sedes:", error);
       setSedes([]);
@@ -40,16 +57,29 @@ const SedesExistentes = () => {
   const editSede = async (sedeId, updatedSedeData) => {
     try {
       if (!updatedSedeData.nombre) {
-        console.error("El campo 'nombre' es obligatorio.");
+        setAlert({
+          show: true,
+          message: "El campo 'nombre' es obligatorio.",
+          type: "error",
+        });
         return;
       }
 
       await axios.put(`http://127.0.0.1:8000/api/sedes/${sedeId}/`, updatedSedeData);
-      console.log("Sede editada exitosamente.");
       fetchSedes();
       setShowDetailModal(false);
+      setAlert({
+        show: true,
+        message: "Sede editada exitosamente.",
+        type: "success",
+      });
     } catch (error) {
       console.error("Error al editar la sede:", error);
+      setAlert({
+        show: true,
+        message: "Hubo un error al editar la sede.",
+        type: "error",
+      });
     }
   };
 
@@ -57,34 +87,86 @@ const SedesExistentes = () => {
   const deleteSede = async (sedeId) => {
     try {
       await axios.delete(`http://127.0.0.1:8000/api/sedes/${sedeId}/`);
-      console.log("Sede eliminada exitosamente.");
       fetchSedes();
+      setAlert({
+        show: true,
+        message: "Sede eliminada exitosamente.",
+        type: "success",
+      });
     } catch (error) {
       console.error("Error al eliminar la sede:", error);
+      setAlert({
+        show: true,
+        message: "Hubo un error al eliminar la sede.",
+        type: "error",
+      });
     }
   };
 
   // Add new sede
-  const addSede = async () => {
-    if (!newSede.nombre) {
-      console.error("El campo 'nombre' es obligatorio.");
-      return;
-    }
+  // Frontend (SedesExistentes.js)
+const addSede = async () => {
+  if (!newSede.nombre || !newSede.direccion || !newSede.ciudad) {
+    setAlert({
+      show: true,
+      message: "Todos los campos son obligatorios.",
+      type: "error",
+    });
+    return;
+  }
 
-    try {
-      await axios.post("http://127.0.0.1:8000/api/sedes/", newSede);
-      console.log("Sede agregada exitosamente.");
-      setShowForm(false);
-      fetchSedes();
-    } catch (error) {
-      console.error("Error al agregar la sede:", error);
-    }
-  };
+  try {
+    const response = await axios.post("http://127.0.0.1:8000/api/sedes/", newSede);
+    console.log(response.data); // Verifica la respuesta de la API
+    setShowForm(false);
+    fetchSedes();
+    setAlert({
+      show: true,
+      message: "Sede agregada exitosamente.",
+      type: "success",
+    });
+  } catch (error) {
+    console.error("Error al agregar la sede:", error);
+    setAlert({
+      show: true,
+      message: "Hubo un error al agregar la sede.",
+      type: "error",
+    });
+  }
+};
+
+
 
   // Load sedes when component mounts
   useEffect(() => {
     fetchSedes();
   }, [fetchSedes]);
+
+  // Efecto para cerrar la alerta automáticamente después de 1 segundo
+  useEffect(() => {
+    if (alert.show) {
+      const timer = setTimeout(() => {
+        setAlert({ ...alert, show: false });
+      }, 1000); // Cerrar la alerta después de 1 segundo
+      return () => clearTimeout(timer); // Limpiar el timer si el componente se desmonta
+    }
+  }, [alert]);
+
+  // Componente de alerta
+  const AlertModal = ({ message, type, onClose }) => {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-container">
+          <div className={`alert-modal ${type}`}>
+            <p>{message}</p>
+            <button className="close-button" onClick={onClose}>
+              &times;
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="records-container">
@@ -96,6 +178,16 @@ const SedesExistentes = () => {
           </button>
         </div>
 
+        {/* Mensajes de alerta */}
+        {alert.show && (
+          <AlertModal
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert({ ...alert, show: false })}
+          />
+        )}
+
+        {/* Lista de sedes */}
         <div className="user-list">
           {sedes.length > 0 ? (
             sedes.map((sede) => (
@@ -127,7 +219,7 @@ const SedesExistentes = () => {
           )}
         </div>
 
-        {/* Modal for viewing and editing sede details */}
+        {/* Modal para ver y editar detalles de la sede */}
         {showDetailModal && selectedSede && (
           <div className="modal-overlay">
             <div className="modal-container">
@@ -171,7 +263,7 @@ const SedesExistentes = () => {
           </div>
         )}
 
-        {/* Modal for adding new sede */}
+        {/* Modal para agregar nueva sede */}
         {showForm && (
           <div className="modal-overlay">
             <div className="modal-container">

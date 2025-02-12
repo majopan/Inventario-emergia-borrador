@@ -523,7 +523,7 @@ def servicio_detail_view(request, servicio_id):
         
         
         
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST'])  # Asegúrate de incluir 'POST' aquí
 @permission_classes([AllowAny])
 def sede_view(request):
     """
@@ -544,16 +544,16 @@ def sede_view(request):
         ciudad = data.get('ciudad', '').strip()
 
         # Validar campos obligatorios
-        if not nombre:
-            return Response({"error": "El campo 'nombre' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+        if not nombre or not direccion or not ciudad:
+            return Response({"error": "Todos los campos son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Crear la sede
             sede = Sede.objects.create(nombre=nombre, direccion=direccion, ciudad=ciudad)
             return Response({"message": "Sede creada exitosamente."}, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error(f"Error al crear la sede: {str(e)}")
             return Response({"error": "Ocurrió un error al crear la sede."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 @api_view(['GET', 'PUT', 'DELETE'])

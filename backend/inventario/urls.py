@@ -44,7 +44,7 @@ urlpatterns = [
     path('api/reset-password/', views.reset_password, name='reset_password'),
 
     # Rutas para sedes y dispositivos
-    path('api/sedes/', views.get_sedes_view, name='get_sedes_view'),
+    path('api/sede/', views.get_sedes_view, name='get_sedes_view'),
     path('api/dispositivos/', views.dispositivo_view, name='dispositivo_view'),
     path('api/dispositivos/<int:dispositivo_id>/', views.dispositivo_detail_view, name='dispositivo_view'),
     path('api/servicios/', views.servicios_view, name='servicios_view'),

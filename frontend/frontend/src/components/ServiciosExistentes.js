@@ -34,7 +34,7 @@ const ServiciosExistentes = () => {
   // Fetch the list of sedes
   const fetchSedes = useCallback(async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/sedes/");
+      const response = await axios.get("http://127.0.0.1:8000/api/sede/");
       if (Array.isArray(response.data.sedes)) {  // Cambiar a 'response.data.sedes' si la respuesta está anidada
         setSedes(response.data.sedes);
       } else {

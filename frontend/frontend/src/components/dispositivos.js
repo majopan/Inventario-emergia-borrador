@@ -62,7 +62,7 @@ const Dispositivos = () => {
   // Obtener las sedes
   const fetchSedes = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/sedes/");
+      const response = await axios.get("http://127.0.0.1:8000/api/sede/");
       if (response.data.sedes && Array.isArray(response.data.sedes)) {
         setSedes(response.data.sedes);
       } else {
