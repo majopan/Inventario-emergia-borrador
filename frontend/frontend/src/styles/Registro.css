@@ -21,7 +21,7 @@
   }
   
   .registro-image {
-    width: 32%; /* La imagen ocupará el 40% del ancho disponible */
+    width: 30%; /* La imagen ocupará el 40% del ancho disponible */
     max-width: 80%; /* La imagen no se desbordará */
     max-height: 80%; /* La imagen no se desbordará */
     object-fit: cover; /* Mantiene la proporción de la imagen */

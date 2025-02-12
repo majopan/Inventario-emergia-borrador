@@ -4,14 +4,13 @@ import Inventario from '../components/inventario';// Asegúrate de personalizar 
 
 const Inventory = () => {
   return (
-    <div className="inventory-container">
-      <div className="inventory-content">
-        <h2>Inventario</h2>
-        <p>Contenido relacionado con el inventario.</p>
+    <div className="registro-container">
+      <div className="registro-image-container">
+        <img src={require('../assets/E-Inventory.png')} alt="E-Inventory" className="registro-image" />
+      </div>
         <div className="registro-content">
         <Inventario/>
-      </div>
-      </div>
+        </div>
     </div>
   );
 };

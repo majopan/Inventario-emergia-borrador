@@ -1,160 +1,188 @@
-    import React, { useEffect, useState } from "react";
-    import axios from "axios";
-    import { 
-    Card, CardContent, Button, Input, Select, MenuItem, Table, TableHead, TableRow, TableCell, TableBody 
-    } from "@mui/material";
-    import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-    import * as XLSX from "xlsx";
-    import { Trash2, FileText } from "lucide-react";
+"use client"
 
-    const Inventario = () => {
-    const [dispositivos, setDispositivos] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
-    const [filtros, setFiltros] = useState({ tipo: "", estado: "", sede: "" });
+import { useEffect, useState } from "react"
+import axios from "axios"
+import { Search, Trash2, FileText } from "lucide-react"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import * as XLSX from "xlsx"
+import '../styles/Inventario.css';
+const Inventario = () => {
+  const [dispositivos, setDispositivos] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState("")
+  const [filtros, setFiltros] = useState({ tipo: "", estado: "", sede: "" })
 
-    useEffect(() => {
-        fetchDispositivos();
-    }, []);
+  useEffect(() => {
+    fetchDispositivos()
+  }, [])
 
-    const fetchDispositivos = async () => {
-        try {
-        setLoading(true);
-        const response = await axios.get("http://127.0.0.1:8000/api/dispositivos/");
-        setDispositivos(response.data);
-        } catch (error) {
-        console.error("Error al obtener dispositivos", error);
-        } finally {
-        setLoading(false);
-        }
-    };
+  const fetchDispositivos = async () => {
+    try {
+      setLoading(true)
+      const response = await axios.get("http://127.0.0.1:8000/api/dispositivos/")
+      setDispositivos(response.data)
+    } catch (error) {
+      console.error("Error al obtener dispositivos", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-    const handleDelete = async (id) => {
-        try {
-        await axios.delete(`/api/dispositivos/${id}/`);
-        fetchDispositivos();
-        } catch (error) {
-        console.error("Error al eliminar el dispositivo", error);
-        }
-    };
+  const handleDelete = async (deviceId) => {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/dispositivos/${deviceId}/`)
+      fetchDispositivos()
+    } catch (error) {
+      console.error("Error al eliminar el dispositivo", error)
+    }
+  }
 
-    const handleExportExcel = () => {
-        const ws = XLSX.utils.json_to_sheet(dispositivos);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Inventario");
-        XLSX.writeFile(wb, "Inventario.xlsx");
-    };
+  const handleExportExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(dispositivos)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, "Inventario")
+    XLSX.writeFile(wb, "Inventario.xlsx")
+  }
 
-    const filteredDispositivos = dispositivos.filter((dispositivo) =>
+  const filteredDispositivos = dispositivos
+    .filter(
+      (dispositivo) =>
         dispositivo.modelo.toLowerCase().includes(search.toLowerCase()) ||
         dispositivo.marca.toLowerCase().includes(search.toLowerCase()) ||
-        dispositivo.serial.toLowerCase().includes(search.toLowerCase())
-    ).filter((dispositivo) =>
+        dispositivo.serial.toLowerCase().includes(search.toLowerCase()),
+    )
+    .filter(
+      (dispositivo) =>
         (filtros.tipo ? dispositivo.tipo === filtros.tipo : true) &&
         (filtros.estado ? dispositivo.estado === filtros.estado : true) &&
-        (filtros.sede ? (dispositivo.sede && dispositivo.sede.nombre === filtros.sede) : true)
-    );
+        (filtros.sede ? dispositivo.sede && dispositivo.sede.nombre === filtros.sede : true),
+    )
 
-    return (
-        <div className="p-6 bg-gray-100 min-h-screen">
-        {/* Contenedor principal */}
-        <div className="max-w-7xl mx-auto">
-            {/* Filtros y botones */}
-            <Card className="mb-4 bg-white shadow-lg rounded-xl p-4">
-            <CardContent>
-                <div className="flex flex-wrap gap-4 items-center">
-                <Input
-                    placeholder="Buscar por modelo, marca o serial"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="bg-gray-200 text-black border border-gray-300 px-4 py-2 rounded-lg focus:ring focus:ring-blue-500 w-full sm:w-auto"
-                />
-                <Select 
-                    value={filtros.tipo} 
-                    onChange={(e) => setFiltros({ ...filtros, tipo: e.target.value })}
-                    className="bg-gray-200 text-black border border-gray-300 px-4 py-2 rounded-lg w-full sm:w-auto"
-                >
-                    <MenuItem value="">Todos</MenuItem>
-                    <MenuItem value="COMPUTADOR">Computador</MenuItem>
-                    <MenuItem value="MONITOR">Monitor</MenuItem>
-                </Select>
-                <Select 
-                    value={filtros.estado} 
-                    onChange={(e) => setFiltros({ ...filtros, estado: e.target.value })}
-                    className="bg-gray-200 text-black border border-gray-300 px-4 py-2 rounded-lg w-full sm:w-auto"
-                >
-                    <MenuItem value="">Todos</MenuItem>
-                    <MenuItem value="BUENO">Bueno</MenuItem>
-                    <MenuItem value="MALO">Malo</MenuItem>
-                </Select>
-                <Button 
-                    onClick={handleExportExcel}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center"
-                >
-                    <FileText className="mr-2" /> Exportar Excel
-                </Button>
-                </div>
-            </CardContent>
-            </Card>
+  return (
+    <div className="inventory-container">
+      <main className="main-content">
 
-            {/* Tabla de Inventario */}
-            <Card className="bg-white shadow-lg rounded-xl overflow-hidden">
-            <CardContent>
-                {loading ? (
-                <div className="flex justify-center py-10 text-lg">Cargando...</div>
-                ) : (
-                <div className="overflow-x-auto">
-                    <Table className="w-full border border-gray-300 rounded-lg">
-                    <TableHead className="bg-gray-800 text-white">
-                        <TableRow>
-                        {["Tipo", "Marca", "Modelo", "Serial", "Estado", "Sede", "Acciones"].map((head) => (
-                            <TableCell key={head} className="py-2 px-4 font-semibold">{head}</TableCell>
-                        ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {filteredDispositivos.map((dispositivo) => (
-                        <TableRow key={dispositivo.id} className="border-b border-gray-300 hover:bg-gray-200 transition">
-                            <TableCell className="py-2 px-4">{dispositivo.tipo}</TableCell>
-                            <TableCell className="py-2 px-4">{dispositivo.marca}</TableCell>
-                            <TableCell className="py-2 px-4">{dispositivo.modelo}</TableCell>
-                            <TableCell className="py-2 px-4">{dispositivo.serial}</TableCell>
-                            <TableCell className="py-2 px-4">{dispositivo.estado}</TableCell>
-                            <TableCell className="py-2 px-4">{dispositivo.sede?.nombre || "N/A"}</TableCell>
-                            <TableCell className="py-2 px-4">
-                            <Button 
-                                onClick={() => handleDelete(dispositivo.id)}
-                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg flex items-center"
-                            >
-                                <Trash2 />
-                            </Button>
-                            </TableCell>
-                        </TableRow>
-                        ))}
-                    </TableBody>
-                    </Table>
-                </div>
-                )}
-            </CardContent>
-            </Card>
+        <div className="metric-cards">
+          <div className="metric-card">
+            <div className="metric-content">
+              <div>
+                <p className="metric-title">Total dispositivos</p>
+                <h3 className="metric-value">{dispositivos.length}</h3>
+              </div>
+              <div className="metric-icon">⭕</div>
+            </div>
+            <p className="metric-update">Actualizado</p>
+          </div>
 
-            {/* Gráfico */}
-            <Card className="mt-6 bg-white shadow-lg rounded-xl p-4">
-            <CardContent>
-                <h2 className="text-lg font-bold mb-4">Gráficos de Inventario</h2>
-                <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={filteredDispositivos}>
-                    <XAxis dataKey="tipo" stroke="#333" />
-                    <YAxis stroke="#333" />
-                    <Tooltip />
-                    <Bar dataKey="cantidad" fill="#3b82f6" />
-                </BarChart>
-                </ResponsiveContainer>
-            </CardContent>
-            </Card>
+          <div className="metric-card">
+            <div className="metric-content">
+              <div>
+                <p className="metric-title">Dispositivos en uso</p>
+                <h3 className="metric-value">{dispositivos.filter((d) => d.estado === "BUENO").length}</h3>
+              </div>
+              <div className="metric-icon">⭕</div>
+            </div>
+            <p className="metric-update">Actualizado</p>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-content">
+              <div>
+                <p className="metric-title">Dispositivos disponibles</p>
+                <h3 className="metric-value">{dispositivos.filter((d) => d.estado === "MALO").length}</h3>
+              </div>
+              <div className="metric-icon">⭕</div>
+            </div>
+            <p className="metric-update">Actualizado</p>
+          </div>
         </div>
-        </div>
-    );
-    };
 
-    export default Inventario;
+        <div className="filters-container">
+        <div className="search-container">
+            <Search className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          <select
+            value={filtros.tipo}
+            onChange={(e) => setFiltros({ ...filtros, tipo: e.target.value })}
+            className="filter-select"
+          >
+            <option value="">Todos los tipos</option>
+            <option value="COMPUTADOR">Computador</option>
+            <option value="MONITOR">Monitor</option>
+          </select>
+          <select
+            value={filtros.estado}
+            onChange={(e) => setFiltros({ ...filtros, estado: e.target.value })}
+            className="filter-select"
+          >
+            <option value="">Todos los estados</option>
+            <option value="BUENO">Bueno</option>
+            <option value="MALO">Malo</option>
+          </select>
+        </div>
+
+        <div className="table-container">
+          {loading ? (
+            <div className="loading">Cargando...</div>
+          ) : (
+            <table className="inventory-table">
+              <thead>
+                <tr>
+                  {["Tipo", "Marca", "Modelo", "Serial", "Estado", "Sede", "Acciones"].map((head) => (
+                    <th key={head}>{head}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredDispositivos.map((dispositivo) => (
+                  <tr key={dispositivo.id}>
+                    <td>{dispositivo.tipo}</td>
+                    <td>{dispositivo.marca}</td>
+                    <td>{dispositivo.modelo}</td>
+                    <td>{dispositivo.serial}</td>
+                    <td>{dispositivo.estado}</td>
+                    <td>{dispositivo.sede?.nombre || "N/A"}</td>
+                    <td>
+                      <button onClick={() => handleDelete(dispositivo.id)} className="delete-button">
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        <div className="action-buttons">
+          <button className="action-button">Importar Excel</button>
+          <button className="action-button">Crear Dispositivo</button>
+          <button onClick={handleExportExcel} className="action-button">
+            <FileText size={18} /> Exportar Excel
+          </button>
+        </div>
+
+        <div className="chart-container">
+          <h2 className="chart-title">Gráficos de Inventario</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={filteredDispositivos}>
+              <XAxis dataKey="tipo" stroke="#fff" />
+              <YAxis stroke="#fff" />
+              <Tooltip />
+              <Bar dataKey="cantidad" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+export default Inventario

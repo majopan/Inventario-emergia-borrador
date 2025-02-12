@@ -12,7 +12,7 @@ const Devices = () => {
         <div className="dashboard-content">
     <Dispositivos />
   </div>
- 
+
     </div>
 
     );
