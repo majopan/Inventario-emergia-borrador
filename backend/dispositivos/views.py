@@ -289,7 +289,7 @@ def reset_password(request):
     except Exception as e:
         return Response({"error": f"Error al cambiar la contraseña: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['GET' , 'POST'])
+@api_view(['GET'])
 def get_sedes_view(request):
     """
     Devuelve una lista de sedes disponibles.
@@ -300,6 +300,7 @@ def get_sedes_view(request):
     except Exception as e:
         logger.error(f"Error al obtener las sedes: {str(e)}")
         return Response({"error": "Ocurrió un error al obtener las sedes."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 
