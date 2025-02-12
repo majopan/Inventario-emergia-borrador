@@ -1,12 +1,14 @@
 import React from 'react';
 import Dispositivos from '../components/dispositivos';
 import '../styles/Devices.css'; // Asegúrate de personalizar este archivo CSS según tus necesidades
+import '../styles/Registro.css';
+
 
 const Devices = () => {
     return (
-        <div className="dashboard-container">
-        <div className="dashboard-image-container">
-          <img src={require('../assets/E-Inventory.png')} alt="E-Inventory" className="dashboard-image" />
+        <div className="registro-container">
+        <div className="registro-image-container">
+          <img src={require('../assets/E-Inventory.png')} alt="E-Inventory" className="registro-image" />
         </div>
         <div className="dashboard-content">
     <Dispositivos />

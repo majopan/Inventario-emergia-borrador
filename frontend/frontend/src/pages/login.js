@@ -17,7 +17,7 @@ const Login = () => {
   useEffect(() => {
     const fetchSedes = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/sedes/');
+        const response = await fetch('http://localhost:8000/api/sede/');
         const data = await response.json();
         if (response.ok) {
           setSedes(data.sedes);  // Utiliza la clave 'sedes' del JSON
