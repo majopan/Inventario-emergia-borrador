@@ -270,5 +270,4 @@
         </div>
     )
     }
-
     export default Inventario
