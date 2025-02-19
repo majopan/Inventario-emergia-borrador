@@ -1,6 +1,6 @@
 from django.contrib import admin  # type: ignore
 from django.contrib.auth.admin import UserAdmin
-from .models import Sede, Servicios, Posicion, Dispositivo, Movimiento, Estadoproveedor, Historial, RolUser
+from .models import Sede, Servicios, Posicion, Dispositivo, Movimiento,  Historial, RolUser
 
 # Admin para RolUser
 @admin.register(RolUser)
@@ -34,16 +34,22 @@ class SedeAdmin(admin.ModelAdmin):
     list_filter = ('ciudad',)
 
 # Admin para Servicios
-@admin.register(Servicios)
+
 class ServiciosAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'codigo_analitico', 'sede')
-    search_fields = ('nombre', 'codigo_analitico')
-    list_filter = ('sede',)
+    list_display = ('nombre', 'codigo_analitico', 'get_sedes')  # Cambio aquí
+    list_filter = ('sedes',)  # Cambio aquí
+
+    def get_sedes(self, obj):
+        return ", ".join([sede.nombre for sede in obj.sedes.all()])
+    get_sedes.short_description = "Sedes"
+
+admin.site.register(Servicios, ServiciosAdmin)
+
 
 # Admin para Posicion
 @admin.register(Posicion)
 class PosicionAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'piso', 'descripcion')
+    list_display = ('nombre', 'piso')
     search_fields = ('nombre',)
     list_filter = ('piso',)
 
@@ -64,11 +70,7 @@ class MovimientoAdmin(admin.ModelAdmin):
     list_filter = ('fecha_movimiento', 'ubicacion_origen', 'ubicacion_destino')
     date_hierarchy = 'fecha_movimiento'
 
-# Admin para Estadoproveedor
-@admin.register(Estadoproveedor)
-class EstadoproveedorAdmin(admin.ModelAdmin):
-    list_display = ('nombre',)
-    search_fields = ('nombre',)
+
 
 # Admin para Historial
 @admin.register(Historial)

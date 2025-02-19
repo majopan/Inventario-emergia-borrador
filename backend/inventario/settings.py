@@ -188,6 +188,8 @@ EMAIL_HOST_PASSWORD = 'ikdu yztg avoj tasc'  # O una contraseña de aplicación 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10  # Cambia este valor según tus necesidades
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination', 'rest_framework_simplejwt.authentication.JWTAuthentication'
+
+    'PAGE_SIZE': 10,  # Cambia este valor según tus necesidades
+
 }

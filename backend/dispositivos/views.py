@@ -115,8 +115,8 @@ def user_detail_view(request, user_id):
 
 
 from rest_framework.decorators import api_view, permission_classes # type: ignore # type: ignore
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.response import Response # type: ignore
+from rest_framework import status # type: ignore
 from .models import RolUser
 import logging
 
@@ -327,7 +327,6 @@ def dispositivo_view(request):
     """
     Maneja la creación y listado de dispositivos.
     """
-
     if request.method == 'GET':
         # Obtener todos los dispositivos
         dispositivos = Dispositivo.objects.all()
@@ -346,6 +345,17 @@ def dispositivo_view(request):
         estado = data.get('estado', '').strip()
         capacidad_memoria_ram = data.get('capacidad_memoria_ram', '').strip()
         capacidad_disco_duro = data.get('capacidad_disco_duro', '').strip()
+        tipo_disco_duro = data.get('tipo_disco_duro', '').strip()
+        tipo_memoria_ram = data.get('tipo_memoria_ram', '').strip()
+        ubicacion = data.get('ubicacion', '').strip()
+        razon_social = data.get('razon_social', '').strip()
+        regimen = data.get('regimen', '').strip()
+        placa_cu = data.get('placa_cu', '').strip()
+        posicion_id = data.get('posicion', None)
+        sede_id = data.get('sede', None)
+        procesador = data.get('procesador', '').strip()
+        sistema_operativo = data.get('sistema_operativo', '').strip()
+        proveedor = data.get('proveedor', '').strip()
 
         # Validaciones básicas
         if not tipo or not marca or not modelo or not serial:
@@ -358,7 +368,7 @@ def dispositivo_view(request):
 
         try:
             # Crear el dispositivo
-            dispositivos = Dispositivo.objects.create(
+            dispositivo = Dispositivo.objects.create(
                 tipo=tipo,
                 marca=marca,
                 modelo=modelo,
@@ -366,6 +376,18 @@ def dispositivo_view(request):
                 estado=estado,
                 capacidad_memoria_ram=capacidad_memoria_ram,
                 capacidad_disco_duro=capacidad_disco_duro,
+                tipo_disco_duro=tipo_disco_duro,
+                tipo_memoria_ram=tipo_memoria_ram,
+                ubicacion=ubicacion,
+                razon_social=razon_social,
+                regimen=regimen,
+                placa_cu=placa_cu,
+                posicion_id=posicion_id,
+                sede_id=sede_id,
+                procesador=procesador,
+                sistema_operativo=sistema_operativo,
+                proveedor=proveedor
+                
             )
             return Response({"message": "Dispositivo registrado exitosamente."}, status=status.HTTP_201_CREATED)
 
@@ -395,7 +417,7 @@ def dispositivo_detail_view(request, dispositivo_id):
         # Actualizar los detalles del dispositivo
         data = request.data
 
-        # Validar y actualizar los campos
+        # Actualizar los campos
         dispositivo.tipo = data.get('tipo', dispositivo.tipo).strip()
         dispositivo.marca = data.get('marca', dispositivo.marca).strip()
         dispositivo.modelo = data.get('modelo', dispositivo.modelo).strip()
@@ -403,6 +425,18 @@ def dispositivo_detail_view(request, dispositivo_id):
         dispositivo.estado = data.get('estado', dispositivo.estado).strip()
         dispositivo.capacidad_memoria_ram = data.get('capacidad_memoria_ram', dispositivo.capacidad_memoria_ram).strip()
         dispositivo.capacidad_disco_duro = data.get('capacidad_disco_duro', dispositivo.capacidad_disco_duro).strip()
+        dispositivo.tipo_disco_duro = data.get('tipo_disco_duro', dispositivo.tipo_disco_duro).strip()
+        dispositivo.tipo_memoria_ram = data.get('tipo_memoria_ram', dispositivo.tipo_memoria_ram).strip()
+        dispositivo.ubicacion = data.get('ubicacion', dispositivo.ubicacion).strip()
+        dispositivo.razon_social = data.get('razon_social', dispositivo.razon_social).strip()
+        dispositivo.regimen = data.get('regimen', dispositivo.regimen).strip()
+        dispositivo.sistema_operativo = data.get('regimen', dispositivo.sistema_operativo).strip()
+        dispositivo.placa_cu = data.get('placa_cu', dispositivo.placa_cu).strip()
+        dispositivo.posicion = data.get('posicion', dispositivo.posicion_id)
+        dispositivo.sede_id = data.get('sede', dispositivo.sede_id)
+        dispositivo.procesador = data.get('procesador', dispositivo.procesador).strip()
+        dispositivo.proveedor = data.get('proveedor', dispositivo.proveedor).strip()
+
 
         # Validaciones
         if not dispositivo.tipo or not dispositivo.marca or not dispositivo.modelo or not dispositivo.serial:
@@ -604,9 +638,9 @@ def sede_detail_view(request, sede_id):
         
 # vistas para las posiciones
 
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes # type: ignore
+from rest_framework.permissions import AllowAny # type: ignore
+from rest_framework.response import Response # type: ignore
 from .models import Posicion
 from .serializers import PosicionSerializer
 

@@ -36,6 +36,9 @@ const Dispositivos = () => {
       placa_cu: "",
       posicion: null, // Clave foránea a Posicion
       sede: null, // Clave foránea a Sede
+      procesador: "", // Agregado
+      sistema_operativo: "", // Agregado
+      proveedor: "" 
     };
   }
 
@@ -322,6 +325,13 @@ const DeviceForm = ({ device, setDevice, onSubmit, posiciones, sedes }) => {
         { value: "TABLET", label: "Tablet" },
         { value: "MOVIL", label: "Celular" },
       ])}
+      {renderSelect("Sistema Operativo", "sistema_operativo", device, setDevice, [
+          { value: "WINDOWS", label: "Windows" },
+          { value: "LINUX", label: "Linux" },
+          { value: "MACOS", label: "MacOS" },
+        ])}
+      {renderInput("Procesador", "procesador", device, setDevice)}
+      {renderInput("Proveedor", "proveedor", device, setDevice)}
       {renderSelect("Marca", "marca", device, setDevice, [
         { value: "DELL", label: "Dell" },
         { value: "HP", label: "HP" },

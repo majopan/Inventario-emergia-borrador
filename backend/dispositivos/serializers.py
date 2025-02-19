@@ -1,8 +1,8 @@
-from rest_framework import serializers
-from django.contrib.auth import authenticate
-from django.contrib.auth.hashers import make_password
+from rest_framework import serializers # type: ignore
+from django.contrib.auth import authenticate # type: ignore
+from django.contrib.auth.hashers import make_password # type: ignore
 from django.contrib.auth import authenticate# type: ignore
-from .models import RolUser, Sede, Dispositivo, Servicios
+from .models import RolUser, Sede, Dispositivo, Servicios, Posicion
 
 class SedeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,24 +48,62 @@ class LoginSerializer(serializers.Serializer):
         data['user'] = user
         return data
     
-    
-    
-
-
-class DispositivoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Dispositivo
-        fields = '__all__'  # Incluir todos los campos del modelo
-
-
-
-from rest_framework import serializers
-from .models import Posicion
 
 class PosicionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Posicion
-        fields = '__all__'  # Incluye todos los campos del modelo
+        fields = '__all__'
+
+
+
+class DispositivoSerializer(serializers.ModelSerializer):
+    sede = serializers.PrimaryKeyRelatedField(queryset=Sede.objects.all(), required=False)  # Relación con sede
+    posicion = serializers.PrimaryKeyRelatedField(queryset=Posicion.objects.all(), required=False)  # Relación con posición
+    servicio = serializers.PrimaryKeyRelatedField(queryset=Servicios.objects.all(), required=False)  # Relación con servicio
+    codigo_analitico = serializers.CharField(source='servicio.codigo_analitico', read_only=True)  # Código analítico del servicio
+    nombre_servicio = serializers.CharField(source='servicio.nombre', read_only=True)  # Nombre del servicio
+    estado_propiedad = serializers.CharField(required=False, allow_blank=True)  # Estado de propiedad del dispositivo
+
+    class Meta:
+        model = Dispositivo
+        fields = [
+            'id', 'tipo', 'estado', 'marca', 'razon_social', 'regimen', 'modelo', 'serial',
+            'placa_cu', 'posicion', 'sede', 'servicio', 'codigo_analitico', 'nombre_servicio',
+            'tipo_disco_duro', 'capacidad_disco_duro', 'tipo_memoria_ram', 'capacidad_memoria_ram',
+            'ubicacion', 'sistema_operativo', 'procesador', 'proveedor', 'estado_propiedad'
+        ]
+
+    def create(self, validated_data):
+        # Obtener relaciones desde `initial_data` si están presentes
+        sede_data = self.initial_data.get('sede')
+        posicion_data = self.initial_data.get('posicion')
+        servicio_data = self.initial_data.get('servicio')
+
+        # Buscar objetos en la base de datos o dejarlos en `None`
+        sede = Sede.objects.get(id=sede_data) if sede_data else None
+        posicion = Posicion.objects.get(id=posicion_data) if posicion_data else None
+        servicio = Servicios.objects.get(id=servicio_data) if servicio_data else None
+
+        # Asignar las relaciones al objeto `Dispositivo`
+        validated_data['sede'] = sede
+        validated_data['posicion'] = posicion
+        validated_data['servicio'] = servicio
+
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        # Manejar las relaciones en la actualización
+        sede_data = self.initial_data.get('sede')
+        posicion_data = self.initial_data.get('posicion')
+        servicio_data = self.initial_data.get('servicio')
+
+        instance.sede = Sede.objects.get(id=sede_data) if sede_data else instance.sede
+        instance.posicion = Posicion.objects.get(id=posicion_data) if posicion_data else instance.posicion
+        instance.servicio = Servicios.objects.get(id=servicio_data) if servicio_data else instance.servicio
+
+        return super().update(instance, validated_data)
+
+
         
 class ServiciosSerializer(serializers.ModelSerializer):
     class Meta:
