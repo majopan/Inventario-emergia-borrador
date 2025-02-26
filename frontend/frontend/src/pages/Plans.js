@@ -4,7 +4,7 @@ import "../styles/terraza2-section.css";
 import Terraza1Section from "./Terraza1Section";
 import Terraza2Section from "./Terraza2Section";
 import Terraza3Section from "./Terraza3Section";
-import Modal from "../components/Modal"; // Importa el componente Modal
+import Modal from "../components/Modal";
 
 const Plans = () => {
   const [scale, setScale] = useState(1);
@@ -13,13 +13,14 @@ const Plans = () => {
   const [selectedCell, setSelectedCell] = useState(null);
   const [planData, setPlanData] = useState([]);
 
-  // Obtén los datos desde la API o archivo JSON
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/posiciones/")
       .then((response) => response.json())
       .then((data) => {
         console.log("Datos recibidos:", data);
-        setPlanData(data);
+        // 🟢 Filtra elementos con claves duplicadas
+        const uniqueData = Array.from(new Set(data.map(JSON.stringify))).map(JSON.parse);
+        setPlanData(uniqueData);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
@@ -69,38 +70,42 @@ const Plans = () => {
             }}
           >
             <div className="left-section">
-              {/* Cafeteria */}
               <div className="cafeteria">
-                <span>Cafeteria</span>
+                <span>Cafetería</span>
               </div>
 
-              {/* Celdas dinámicas */}
               <div className="training-room">
-                <div className="training-cells">
-                  {planData.map((cell) => (
-                    <div
-                      key={cell.id}
-                      className={`cell ${cell.color}`}
-                      style={{
-                        position: "absolute",
-                        left: `${cell.posicion_x}px`,
-                        top: `${cell.posicion_y}px`,
-                      }}
-                      onClick={() => handleCellClick(cell)}
-                    >
-                      {cell.id_espacio}
-                    </div>
-                  ))}
-                </div>
+    <div className="training-cells">
+      {planData.map((cell, index) => (
+        <div
+          key={`${cell.id}-${cell.coordenada_x}-${cell.coordenada_y}-${index}`} // ✅ Clave única
+          className="cell"
+          style={{
+            position: "absolute",
+            left: `${cell.coordenada_x}px`,
+            top: `${cell.coordenada_y}px`,
+            width: "50px",
+            height: "20px",
+            textAlign: "center",
+            lineHeight: "20px",
+            border: "1px solid black",
+            backgroundColor: cell.color, // ✅ Aplica el color
+            cursor: "pointer",
+          }}
+          onClick={() => handleCellClick(cell)}
+        >
+          {cell.nombre}
+        </div>
+      ))}
+    </div>
                 <div className="training-label">
                   Sala Capacitaciones
                   <br />
-                  formacion
+                  Formación
                 </div>
               </div>
             </div>
 
-            {/* Otras secciones */}
             <Terraza3Section />
             <Terraza2Section />
             <Terraza1Section />

@@ -73,10 +73,9 @@ class Servicios(models.Model):
         verbose_name_plural = "Servicios"
 
 
-
 class Posicion(models.Model):
     """
-    Modelo que representa una posición en una sede.
+    Modelo que representa una posición en una sede con colores personalizados.
     """
 
     ESTADOS = [
@@ -87,10 +86,21 @@ class Posicion(models.Model):
     ]
 
     COLORES = {
-        'disponible': 'green',
-        'ocupado': 'red',
-        'reservado': 'yellow',
-        'inactivo': 'gray',
+        '530001': '#0094FF',  # Azul claro
+        '530013': '#00FF00',  # Verde
+        '530014': '#FF9900',  # Naranja
+        '152001': '#9900FF',  # Morado
+        '320026': '#6600CC',  # Azul oscuro
+        '221003': '#FFD700',  # Amarillo
+        '390001': '#008080',  # Verde azulado
+        '153001': '#FF66B2',  # Rosa
+        '269001': '#FF0000',  # Rojo
+        '186020': '#FF4500',  # Rojo oscuro
+        'Desarrollo': '#FF0000',  # Rojo fuerte
+        'Soporte': '#8B0000',  # Rojo oscuro
+        'Selección': '#808000',  # Verde oliva
+        'Leroy Merli': '#8A2BE2',  # Púrpura
+        'default': '#B0BEC5'  # Gris azulado por defecto
     }
 
     PISOS = [
@@ -101,23 +111,28 @@ class Posicion(models.Model):
         ('TORRE1', 'Torre 1'),
     ]
 
-    # Relaciones
-    sede = models.ForeignKey(Sede, on_delete=models.CASCADE, related_name='posiciones')
+    sede = models.ForeignKey('Sede', on_delete=models.CASCADE, related_name='posiciones')
     servicio = models.ForeignKey('Servicios', on_delete=models.SET_NULL, null=True, blank=True, related_name='posiciones')
 
-    # Atributos de ubicación
-    nombre = models.CharField(max_length=100)  # Nombre de la posición
+    nombre = models.CharField(max_length=100)
     piso = models.CharField(max_length=10, choices=PISOS)
     coordenada_x = models.IntegerField()
     coordenada_y = models.IntegerField()
-
-    # Estado y visualización
+    descripcion = models.TextField(blank=True, null=True)
     estado = models.CharField(max_length=10, choices=ESTADOS, default='disponible')
-    color = models.CharField(max_length=10, default='green')  # Se actualizará automáticamente
+    color = models.CharField(max_length=20, default='#B0BEC5')
 
     def save(self, *args, **kwargs):
-        """Antes de guardar, aseguramos que el color coincida con el estado."""
-        self.color = self.COLORES.get(self.estado, 'gray')
+        """
+        Asegura que el color de la posición se actualiza correctamente.
+        Primero intenta obtener el color según el nombre del servicio.
+        Si no hay servicio o el nombre del servicio no está en la lista, usa el color por defecto.
+        """
+        if self.servicio and self.servicio.nombre in self.COLORES:
+            self.color = self.COLORES[self.servicio.nombre]
+        else:
+            self.color = self.COLORES['default']
+
         super(Posicion, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -127,11 +142,10 @@ class Posicion(models.Model):
         verbose_name = "Posición"
         verbose_name_plural = "Posiciones"
 
-        
-    def save(self, *args, **kwargs):
-        if self.dispositivos.count() >= 3:
-            raise ValidationError("No se pueden asignar más de 3 dispositivos a esta posición.")
-        super(Posicion, self).save(*args, **kwargs)
+
+
+
+
 
 
 class Dispositivo(models.Model):
@@ -245,6 +259,13 @@ class Dispositivo(models.Model):
         ('SEDE', 'Sede'),
         ('OTRO', 'Otro'),
     ]
+    
+    ESTADOS_PROPIEDAD = [
+        ('PROPIO', 'Propio'),
+        ('ARRENDADO', 'Arrendado'),
+        ('DONADO', 'Donado'),
+        ('OTRO', 'Otro'),
+    ]
 
     tipo = models.CharField(max_length=10, choices=TIPOS_DISPOSITIVOS)
     estado = models.CharField(max_length=10, choices=ESTADO_DISPOSITIVO, null=True, blank=True)
@@ -257,10 +278,12 @@ class Dispositivo(models.Model):
     modelo = models.CharField(max_length=50)
     serial = models.CharField(max_length=50, unique=True, db_index=True)
     placa_cu = models.CharField(max_length=50, unique=True, null=True, blank=True)
-    
+    servicio = models.ForeignKey('Servicios', on_delete=models.SET_NULL, null=True, blank=True, related_name='dispositivos')
+    piso = models.CharField(max_length=10, null=True, blank=True)  # Se extrae de la posición
+    codigo_analitico = models.TextField(null=True, blank=True)  # Se extrae del servicio
+    estado_propiedad = models.CharField(max_length=10, choices=ESTADOS_PROPIEDAD, null=True, blank=True)
     # Clave foránea a Posicion con related_name para evitar conflicto
     posicion = models.ForeignKey(Posicion, on_delete=models.SET_NULL, null=True, blank=True, related_name='dispositivos')
-    
     sede = models.ForeignKey(Sede, on_delete=models.SET_NULL, null=True, blank=True)
     tipo_disco_duro = models.CharField(max_length=10, choices=TIPOS_DISCO_DURO, null=True, blank=True)
     capacidad_disco_duro = models.CharField(max_length=10, choices=CAPACIDADES_DISCO_DURO, null=True, blank=True)
@@ -270,9 +293,27 @@ class Dispositivo(models.Model):
     proveedor = models.CharField(max_length=100, null=True, blank=True)  # Nombre del proveedor
     sistema_operativo = models.CharField(max_length=10, choices=SISTEMAS_OPERATIVOS, null=True, blank=True)  # Sistema operativo instalado
     procesador = models.CharField(max_length=50, choices=PROCESADORES, null=True, blank=True)
+    usuario_asignado = models.ForeignKey(
+        RolUser, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='dispositivos_asignados'
+    )
+    def save(self, *args, **kwargs):
+        """
+        Antes de guardar, heredamos la información de la posición y el servicio asociado.
+        """
+        if self.posicion:
+            self.piso = self.posicion.piso  # Extrae el piso de la posición asociada
+
+        if self.servicio:
+            self.codigo_analitico = self.servicio.codigo_analitico  # Extrae el código analítico del servicio
+
+        super(Dispositivo, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.tipo} - {self.marca} {self.modelo} (Serial: {self.serial})"
+        return f"{self.marca} {self.modelo} - {self.serial}"
 
     class Meta:
         verbose_name = "Dispositivo"
@@ -281,11 +322,20 @@ class Dispositivo(models.Model):
 
 class Movimiento(models.Model):
     dispositivo = models.ForeignKey(Dispositivo, on_delete=models.CASCADE)
-    encargado = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    encargado = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     fecha_movimiento = models.DateTimeField(auto_now_add=True)
     ubicacion_origen = models.CharField(max_length=50)
     ubicacion_destino = models.CharField(max_length=50)
     observacion = models.TextField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        """Genera automáticamente una descripción detallada de la acción realizada."""
+        if not self.observacion:
+            self.observacion = (
+                f"Dispositivo {self.dispositivo.serial} ({self.dispositivo.marca} {self.dispositivo.modelo}) "
+                f"movido de {self.ubicacion_origen} a {self.ubicacion_destino} por {self.encargado.nombre if self.encargado else 'Desconocido'}."
+            )
+        super(Movimiento, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"Movimiento de {self.dispositivo.serial} - {self.fecha_movimiento}"
@@ -293,6 +343,7 @@ class Movimiento(models.Model):
     class Meta:
         verbose_name = "Movimiento"
         verbose_name_plural = "Movimientos"
+
 
 
 
@@ -306,7 +357,7 @@ def handle_movimiento_post_save(sender, instance, created, **kwargs):
 
 class Historial(models.Model):
     dispositivo = models.ForeignKey(Dispositivo, on_delete=models.CASCADE)
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
     cambios = models.TextField()
     tipo_cambio = models.CharField(max_length=100, default='Movimiento registrado')
@@ -321,15 +372,21 @@ class Historial(models.Model):
 
 @receiver(post_save, sender=Movimiento)
 def crear_historial_por_movimiento(sender, instance, created, **kwargs):
+    """Crea automáticamente un historial cuando se registra un movimiento."""
     if created:
         dispositivo = instance.dispositivo
         usuario = instance.encargado
-        cambios = f"El dispositivo {dispositivo.serial} cambió de {instance.ubicacion_origen} a {instance.ubicacion_destino}."
+        cambios = (
+            f"El dispositivo {dispositivo.serial} ({dispositivo.marca} {dispositivo.modelo}) "
+            f"fue movido de {instance.ubicacion_origen} a {instance.ubicacion_destino} "
+            f"por {usuario.nombre if usuario else 'Desconocido'}."
+        )
+
         Historial.objects.create(
             dispositivo=dispositivo,
-            usuario=usuario,
+            usuario=usuario if usuario else None,  # Si no hay usuario, deja el campo vacío
             cambios=cambios,
-            tipo_cambio='Movimiento registrado'
+            tipo_cambio="Movimiento registrado"
         )
     
     
@@ -346,10 +403,17 @@ class RegistroActividad(models.Model):
 
 @receiver(post_save, sender=Dispositivo)
 def registrar_movimiento(sender, instance, **kwargs):
-    if instance.posicion:  # Si hay una nueva posición asignada
+    """Registra un movimiento automáticamente cuando se asigna una posición a un dispositivo."""
+    if instance.posicion:
+        encargado = instance.usuario_asignado or instance.posicion.sede.usuarios_asignados.first()
+
+        if not encargado:
+            encargado = RolUser.objects.filter(rol='admin').first()
+
         Movimiento.objects.create(
             dispositivo=instance,
-            ubicacion_origen="Desconocido",  # Se puede mejorar con un registro previo
+            ubicacion_origen="Desconocido",
             ubicacion_destino=instance.posicion.nombre,
-            encargado=instance.usuario_asignado,  # Si existe un usuario asignado
+            encargado=encargado,
         )
+

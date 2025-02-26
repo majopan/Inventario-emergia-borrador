@@ -1,13 +1,44 @@
 import json
 from django.core.management.base import BaseCommand
-from dispositivos.models import Posicion  # Asegúrate de importar tu modelo correctamente
+from django.db import connection
+from dispositivos.models import Posicion, Sede
 
 class Command(BaseCommand):
     help = 'Carga los datos del JSON en el modelo Posicion'
 
+    ESTADO_MAP = {
+        "available": "disponible",
+        "occupied": "ocupado",
+        "reserved": "reservado",
+        "inactive": "inactivo"
+    }
+
+    COLOR_MAP = {
+        "default": "green",
+        "yellow": "yellow",
+        "red-mark": "red",
+        "red-dot": "red",
+        "orange": "yellow",  
+        "gray": "gray"
+    }
+
+    PISO_MAP = {
+        "Piso 1": "PISO1",
+        "Piso 2": "PISO2",
+        "Piso 3": "PISO3",
+        "Piso 4": "PISO4",
+        "Torre 1": "TORRE1"
+    }
+
     def handle(self, *args, **kwargs):
-        # Eliminar todos los registros existentes
+        # 🔴 Eliminar todas las posiciones existentes para evitar duplicados
         Posicion.objects.all().delete()
+
+        # 🔵 Resetear la secuencia del ID en PostgreSQL
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT setval('dispositivos_posicion_id_seq', COALESCE((SELECT MAX(id) FROM dispositivos_posicion), 1), false);"
+            )
 
         json_data = '''
         {
@@ -128,17 +159,31 @@ class Command(BaseCommand):
 
         data = json.loads(json_data)
 
+        # ✅ Crear un conjunto para evitar duplicados
+        posiciones_creadas = set()
+
+        sede, created = Sede.objects.get_or_create(nombre="Sede Principal")
+
         for section in data['sections']:
             for cell in section['cells']:
-                Posicion.objects.create(
-                    piso=cell['floor'],
-                    nombre=cell['name'],
-                    descripcion=cell['description'],
-                    id_espacio=cell['id'],
-                    status=cell['status'],
-                    color=cell['color'],
-                    posicion_x=cell['position']['x'],
-                    posicion_y=cell['position']['y']
-                )
+                estado = self.ESTADO_MAP.get(cell['status'], 'disponible')
+                color = self.COLOR_MAP.get(cell['color'], 'gray')
+                piso = self.PISO_MAP.get(cell['floor'], 'PISO1')
 
-        self.stdout.write(self.style.SUCCESS('Datos cargados exitosamente'))
+                # Generar clave única combinando valores clave
+                unique_key = f"{cell['id']}-{cell['position']['x']}-{cell['position']['y']}"
+
+                if unique_key not in posiciones_creadas:
+                    Posicion.objects.create(
+                        sede=sede,
+                        nombre=cell['name'],
+                        piso=piso,
+                        coordenada_x=cell['position']['x'],
+                        coordenada_y=cell['position']['y'],
+                        estado=estado,
+                        color=color,
+                        descripcion=cell.get('description', '')
+                    )
+                    posiciones_creadas.add(unique_key)  # Agregar al conjunto
+
+        self.stdout.write(self.style.SUCCESS('✅ Datos cargados exitosamente'))

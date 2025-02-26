@@ -370,3 +370,21 @@
     }
   }
 }
+
+/* Sección de error debajo de "Iniciar sesión" */
+.error-general {
+  text-align: center;
+  color: red;
+  font-size: 0.9em;
+}
+
+/* Espacio reservado para errores específicos */
+.error-container {
+  text-align: left;
+}
+
+/* Mensajes de error en rojo */
+.error {
+  color: red;
+  font-size: 0.9em;
+}

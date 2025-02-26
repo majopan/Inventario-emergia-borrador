@@ -11,21 +11,19 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [sedeId, setSedeId] = useState('');
   const [sedes, setSedes] = useState([]);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSedes = async () => {
       try {
         const response = await fetch('http://localhost:8000/api/sede/');
-        const data = await response.json();
-        if (response.ok) {
-          setSedes(data.sedes);  // Utiliza la clave 'sedes' del JSON
-        } else {
-          setError('Error al obtener las sedes');
+        if (!response.ok) {
+          throw new Error('Error al obtener las sedes.');
         }
+        const data = await response.json();
+        setSedes(data.sedes);
       } catch (err) {
-        setError('Error de conexión con el servidor');
+        alert('Error de conexión con el servidor.');
       }
     };
 
@@ -35,13 +33,32 @@ const Login = () => {
   const handleForgotPasswordClick = () => setForgotPassword(true);
   const handleBackToLoginClick = () => setForgotPassword(false);
 
+  const validateForm = () => {
+    if (!username.trim()) {
+      alert('Por favor ingresa tu nombre de usuario.');
+      return false;
+    }
+
+    if (!password.trim()) {
+      alert('Por favor ingresa tu contraseña.');
+      return false;
+    } else if (password.trim().length < 6) {
+      alert('La contraseña debe tener al menos 6 caracteres.');
+      return false;
+    }
+
+    if (!sedeId) {
+      alert('Por favor selecciona una sede.');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!sedeId) {
-      setError('Por favor selecciona una sede.');
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       const response = await fetch('http://localhost:8000/api/login/', {
@@ -50,15 +67,26 @@ const Login = () => {
         body: JSON.stringify({ username, password, sede_id: sedeId }),
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        alert(`Bienvenido ${data.username}`);
-        navigate('/dashboard');
-      } else {
-        setError(data.error || 'Error desconocido');
+      // Si el servidor responde con un error, lanzar una excepción controlada
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('El usuario ingresado no existe.');
+        } else if (response.status === 401) {
+          throw new Error('Contraseña incorrecta.');
+        } else if (response.status === 403) {
+          throw new Error('Tu cuenta está inactiva. Contacta al administrador.');
+        } else {
+          throw new Error('Error al iniciar sesión. Inténtalo nuevamente.');
+        }
       }
+
+      // Si la respuesta es correcta, proceder con el login
+      const data = await response.json();
+      alert(`Bienvenido ${data.username}`);
+      navigate('/dashboard');
+
     } catch (err) {
-      setError('Error de conexión con el servidor');
+      alert(err.message);  // Muestra la alerta con el error exacto
     }
   };
 
@@ -70,19 +98,21 @@ const Login = () => {
             <form onSubmit={handleLogin}>
               <Logo className="logo" style={{ width: '220px', height: 'auto', padding: '10px' }} />
               <span>Iniciar sesión</span>
-              {error && <p className="error">{error}</p>}
+
               <input
                 type="text"
                 placeholder="Nombre de usuario"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
+
               <input
                 type="password"
                 placeholder="Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+
               <select value={sedeId} onChange={(e) => setSedeId(e.target.value)}>
                 <option value="">Seleccionar sede</option>
                 {sedes.map(sede => (
@@ -91,6 +121,7 @@ const Login = () => {
                   </option>
                 ))}
               </select>
+
               <Link to="#" onClick={handleForgotPasswordClick}>¿Olvidaste tu contraseña?</Link>
               <button type="submit">Entrar</button>
             </form>

@@ -647,9 +647,7 @@ from .serializers import PosicionSerializer
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def posiciones_view(request):
-    # Obtener todas las posiciones
-    posiciones = Posicion.objects.all()
+    posiciones = Posicion.objects.all().prefetch_related('dispositivos')
     serializer = PosicionSerializer(posiciones, many=True)
 
-    # Devolver los datos serializados directamente
     return Response(serializer.data, status=200)
