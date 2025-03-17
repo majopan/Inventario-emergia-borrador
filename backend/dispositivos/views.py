@@ -638,16 +638,53 @@ def sede_detail_view(request, sede_id):
         
 # vistas para las posiciones
 
-from rest_framework.decorators import api_view, permission_classes # type: ignore
-from rest_framework.permissions import AllowAny # type: ignore
-from rest_framework.response import Response # type: ignore
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework import status
 from .models import Posicion
 from .serializers import PosicionSerializer
 
-@api_view(['GET'])
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])  # Ahora permite GET, POST, PUT y DELETE
 @permission_classes([AllowAny])
-def posiciones_view(request):
-    posiciones = Posicion.objects.all().prefetch_related('dispositivos')
-    serializer = PosicionSerializer(posiciones, many=True)
+def posiciones_view(request, pk=None):  # Añade pk como parámetro opcional
+    if request.method == 'GET':
+        if pk is not None:
+            try:
+                posicion = Posicion.objects.get(pk=pk)
+                serializer = PosicionSerializer(posicion)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Posicion.DoesNotExist:
+                return Response({"error": "Posición no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            posiciones = Posicion.objects.all()
+            serializer = PosicionSerializer(posiciones, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-    return Response(serializer.data, status=200)
+    elif request.method == 'POST':
+        serializer = PosicionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'PUT':
+        try:
+            posicion = Posicion.objects.get(pk=pk)
+        except Posicion.DoesNotExist:
+            return Response({"error": "Posición no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PosicionSerializer(posicion, data=request.data, partial=True)  # partial=True permite actualizaciones parciales
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        try:
+            posicion = Posicion.objects.get(pk=pk)
+        except Posicion.DoesNotExist:
+            return Response({"error": "Posición no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+
+        posicion.delete()
+        return Response({"message": "Posición eliminada correctamente"}, status=status.HTTP_204_NO_CONTENT)

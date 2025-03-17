@@ -69,6 +69,7 @@ urlpatterns = [
     
     # rutas de json plano
     path('api/posiciones/', views.posiciones_view, name='posicion-view'),
+    path('api/posiciones/<int:pk>/', views.posiciones_view, name='posicion-detail'),
 ]
 
 

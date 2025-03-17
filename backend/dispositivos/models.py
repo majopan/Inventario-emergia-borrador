@@ -74,10 +74,6 @@ class Servicios(models.Model):
 
 
 class Posicion(models.Model):
-    """
-    Modelo que representa una posición en una sede con colores personalizados.
-    """
-
     ESTADOS = [
         ('disponible', 'Disponible'),
         ('ocupado', 'Ocupado'),
@@ -85,62 +81,41 @@ class Posicion(models.Model):
         ('inactivo', 'Inactivo'),
     ]
 
-    COLORES = {
-        '530001': '#0094FF',  # Azul claro
-        '530013': '#00FF00',  # Verde
-        '530014': '#FF9900',  # Naranja
-        '152001': '#9900FF',  # Morado
-        '320026': '#6600CC',  # Azul oscuro
-        '221003': '#FFD700',  # Amarillo
-        '390001': '#008080',  # Verde azulado
-        '153001': '#FF66B2',  # Rosa
-        '269001': '#FF0000',  # Rojo
-        '186020': '#FF4500',  # Rojo oscuro
-        'Desarrollo': '#FF0000',  # Rojo fuerte
-        'Soporte': '#8B0000',  # Rojo oscuro
-        'Selección': '#808000',  # Verde oliva
-        'Leroy Merli': '#8A2BE2',  # Púrpura
-        'default': '#B0BEC5'  # Gris azulado por defecto
-    }
-
-    PISOS = [
-        ('PISO1', 'Piso 1'),
-        ('PISO2', 'Piso 2'),
-        ('PISO3', 'Piso 3'),
-        ('PISO4', 'Piso 4'),
-        ('TORRE1', 'Torre 1'),
-    ]
-
-    sede = models.ForeignKey('Sede', on_delete=models.CASCADE, related_name='posiciones')
-    servicio = models.ForeignKey('Servicios', on_delete=models.SET_NULL, null=True, blank=True, related_name='posiciones')
-
-    nombre = models.CharField(max_length=100)
-    piso = models.CharField(max_length=10, choices=PISOS)
-    coordenada_x = models.IntegerField()
-    coordenada_y = models.IntegerField()
-    descripcion = models.TextField(blank=True, null=True)
-    estado = models.CharField(max_length=10, choices=ESTADOS, default='disponible')
-    color = models.CharField(max_length=20, default='#B0BEC5')
-
-    def save(self, *args, **kwargs):
-        """
-        Asegura que el color de la posición se actualiza correctamente.
-        Primero intenta obtener el color según el nombre del servicio.
-        Si no hay servicio o el nombre del servicio no está en la lista, usa el color por defecto.
-        """
-        if self.servicio and self.servicio.nombre in self.COLORES:
-            self.color = self.COLORES[self.servicio.nombre]
-        else:
-            self.color = self.COLORES['default']
-
-        super(Posicion, self).save(*args, **kwargs)
+    nombre = models.CharField(max_length=100, blank=True, null=True)
+    tipo = models.CharField(max_length=50, blank=True, null=True)
+    estado = models.CharField(max_length=50, choices=ESTADOS, default='disponible')
+    detalles = models.TextField(blank=True, null=True)
+    fila = models.IntegerField()
+    columna = models.CharField(max_length=5)
+    color = models.CharField(max_length=20, default='#FFFFFF')
+    colorFuente = models.CharField(max_length=20, default='#000000')
+    colorOriginal = models.CharField(max_length=50, blank=True, null=True)
+    borde = models.BooleanField(default=True)
+    bordeDoble = models.BooleanField(default=False)
+    bordeDetalle = models.JSONField(default=dict)
+    piso = models.CharField(max_length=50)
+    sede = models.CharField(max_length=100, blank=True, null=True)
+    servicio = models.CharField(max_length=100, blank=True, null=True)
+    dispositivos = models.CharField(max_length=255, blank=True, null=True)  # Cambiado para almacenar como texto
+    mergedCells = models.JSONField(default=list)
 
     def __str__(self):
-        return f"{self.nombre} - {self.sede.nombre} ({self.piso})"
+        return f"{self.nombre} ({self.fila}{self.columna})"
+
+    def clean(self):
+        if self.fila < 1:
+            raise ValueError("La fila debe ser un número positivo.")
+        if not self.columna.isalpha():
+            raise ValueError("La columna debe contener solo letras.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Posición"
         verbose_name_plural = "Posiciones"
+
 
 
 
@@ -278,13 +253,10 @@ class Dispositivo(models.Model):
     modelo = models.CharField(max_length=50)
     serial = models.CharField(max_length=50, unique=True, db_index=True)
     placa_cu = models.CharField(max_length=50, unique=True, null=True, blank=True)
-    servicio = models.ForeignKey('Servicios', on_delete=models.SET_NULL, null=True, blank=True, related_name='dispositivos')
     piso = models.CharField(max_length=10, null=True, blank=True)  # Se extrae de la posición
     codigo_analitico = models.TextField(null=True, blank=True)  # Se extrae del servicio
     estado_propiedad = models.CharField(max_length=10, choices=ESTADOS_PROPIEDAD, null=True, blank=True)
-    # Clave foránea a Posicion con related_name para evitar conflicto
-    posicion = models.ForeignKey(Posicion, on_delete=models.SET_NULL, null=True, blank=True, related_name='dispositivos')
-    sede = models.ForeignKey(Sede, on_delete=models.SET_NULL, null=True, blank=True)
+    sede = models.CharField(max_length=100, null=True, blank=True)  # Atributo como cadena de texto
     tipo_disco_duro = models.CharField(max_length=10, choices=TIPOS_DISCO_DURO, null=True, blank=True)
     capacidad_disco_duro = models.CharField(max_length=10, choices=CAPACIDADES_DISCO_DURO, null=True, blank=True)
     tipo_memoria_ram = models.CharField(max_length=10, choices=TIPOS_MEMORIA_RAM, null=True, blank=True)
@@ -293,23 +265,9 @@ class Dispositivo(models.Model):
     proveedor = models.CharField(max_length=100, null=True, blank=True)  # Nombre del proveedor
     sistema_operativo = models.CharField(max_length=10, choices=SISTEMAS_OPERATIVOS, null=True, blank=True)  # Sistema operativo instalado
     procesador = models.CharField(max_length=50, choices=PROCESADORES, null=True, blank=True)
-    usuario_asignado = models.ForeignKey(
-        RolUser, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
-        related_name='dispositivos_asignados'
-    )
+    usuario_asignado = models.CharField(max_length=100, null=True, blank=True)  # Cambiado a CharField para evitar relaciones
+
     def save(self, *args, **kwargs):
-        """
-        Antes de guardar, heredamos la información de la posición y el servicio asociado.
-        """
-        if self.posicion:
-            self.piso = self.posicion.piso  # Extrae el piso de la posición asociada
-
-        if self.servicio:
-            self.codigo_analitico = self.servicio.codigo_analitico  # Extrae el código analítico del servicio
-
         super(Dispositivo, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -318,6 +276,7 @@ class Dispositivo(models.Model):
     class Meta:
         verbose_name = "Dispositivo"
         verbose_name_plural = "Dispositivos"
+
 
 
 class Movimiento(models.Model):
